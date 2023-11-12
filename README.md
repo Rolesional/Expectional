@@ -3,7 +3,7 @@
 
 <p align="left">
 <a href="https://discord.gg/ACGvzP9cwy">
-<img src="https://discordapp.com/api/guilds//widget.png?style=shield">
+<img src="https://avatars.githubusercontent.com/u/1965106?s=280&v=4">
 </a>
 </p>
 
