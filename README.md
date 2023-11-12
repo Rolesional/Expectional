@@ -41,9 +41,13 @@ compiled loader for easy load it: https://github.com/Rolesional/RolesWareCS2/raw
 if u want compile it urself kdmapper here: https://github.com/TheCruZ/kdmapper
 
 - now firsly map the driver
+  
   1- put driver and kdmapper into same folder right click at kdmapper click "features" check run this app as admin and click ok
+  
   2- drag driver to kdmapper and run it will load driver if its works for ur windows version
+  
   3- open ur compiled expectional soft
+  
 done
 
  Home is menu button / End is panic button
