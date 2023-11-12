@@ -53,6 +53,7 @@ done
 if u getting this error: 
 
 ![error thing](https://cdn.discordapp.com/attachments/947516714608918568/1173215389673586779/Screenshot_2.png?ex=656324fa&is=6550affa&hm=3926db162dfaa2d245bdcce82a69c668dbbf491a6a97cc540bb6882d96c5cc4f&)
+
 just go to error, copy location of render.hpp and paste it to here! it will be fixed
 
 if its closses with minimizing problem
