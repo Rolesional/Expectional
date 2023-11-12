@@ -33,7 +33,9 @@ Expectional is read only software so we cant use some features like "Skinchanger
 # How to use / Getting started
 
 ok now how to use... driver is shared on this guy's project: https://github.com/singhhdev/cs2-external-source-kernel/tree/main (my soft forked from gamerdoc cs2 kernel cheat)
+
 there is precompiled versions and kdmapper here: https://github.com/Rolesional/RolesWareCS2/tree/main/SoftWare%20Files
+
 if u want compile it urself kdmapper here: https://github.com/TheCruZ/kdmapper
 
 - now firsly map the driver
