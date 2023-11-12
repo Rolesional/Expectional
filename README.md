@@ -1,7 +1,7 @@
 
 # Expectional
 
-<p align="right">
+<p align="left">
 <a href="https://discord.gg/ACGvzP9cwy">
 <img src="https://discordapp.com/api/guilds/1135362291311849693/widget.png?style=shield">
 </a>
