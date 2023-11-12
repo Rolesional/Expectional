@@ -36,6 +36,8 @@ ok now how to use... driver is shared on this guy's project: https://github.com/
 
 there is precompiled versions and kdmapper here: https://github.com/Rolesional/RolesWareCS2/tree/main/SoftWare%20Files
 
+compiled loader for easy load it: https://github.com/Rolesional/RolesWareCS2/raw/main/Expectional%20Loader.rar
+
 if u want compile it urself kdmapper here: https://github.com/TheCruZ/kdmapper
 
 - now firsly map the driver
@@ -46,7 +48,11 @@ done
 
  Home is menu button / End is panic button
 
-# An Problem
+# An Problems
+
+if u getting this error: 
+![error thing](https://cdn.discordapp.com/attachments/947516714608918568/1173215389673586779/Screenshot_2.png?ex=656324fa&is=6550affa&hm=3926db162dfaa2d245bdcce82a69c668dbbf491a6a97cc540bb6882d96c5cc4f&)
+just go to error, copy location of render.hpp and paste it to here! it will be fixed
 
 if its closses with minimizing problem
 change ur resolution to windowed and change to again fullscreen windowed then press end and open expectional again
