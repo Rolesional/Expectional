@@ -18,7 +18,8 @@ Undetected CS2 Software
 # Features
 Expectional is read only software so we cant use some features like "Skinchanger" now look at our features:
 
- - ESP
+ - ESP and aimbot
+   
    5 Types:
    - Box ESP (box and corner)
    - Skeleton ESP (bones)
