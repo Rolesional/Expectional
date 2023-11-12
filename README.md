@@ -3,7 +3,7 @@
 
 <p align="left">
 <a href="https://discord.gg/ACGvzP9cwy">
-<img src="https://avatars.githubusercontent.com/u/1965106?s=280&v=4">
+discord server
 </a>
 </p>
 
