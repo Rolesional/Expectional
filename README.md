@@ -1,7 +1,12 @@
 
 # Expectional
 
+<p align="right">
 <a href="https://discord.gg/ACGvzP9cwy">
+<img src="https://discordapp.com/api/guilds/1135362291311849693/widget.png?style=shield">
+</a>
+</p>
+
 Undetected CS2 Software
 
 - `Expectional` The name of this project
