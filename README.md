@@ -1,6 +1,12 @@
 
 # Expectional
 
+# Forked from this project!!!: https://github.com/singhhdev/cs2-external-source-kernel
+
+credits:
+- singhhdev (actual owner of this codes)
+- Rolesional (edited for read only)
+
 <p align="left">
 <a href="https://discord.gg/ACGvzP9cwy">
 discord server
