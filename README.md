@@ -1,7 +1,8 @@
 
 # Expectional
 
-# Forked from this project!!!: https://github.com/singhhdev/cs2-external-source-kernel
+# Forked from this project!!!:
+ https://github.com/singhhdev/cs2-external-source-kernel
 
 credits:
 - singhhdev (actual owner of this codes)
