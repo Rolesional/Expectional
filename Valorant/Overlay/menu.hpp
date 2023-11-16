@@ -314,10 +314,10 @@ void drawmenu() {
 
 		ImGui::Begin(("Expectional (Undetected)"), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoResize | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse);
 		(ImGui::Text("Welcome!", ImVec2()));
-		(ImGui::Text("Version: 1.5"));
+		(ImGui::Text("Version: 1.6"));
 		ImGui::Checkbox("Aimbot", &Settings::aimbot::aimbot);
 		if (Settings::aimbot::aimbot) {
-			ImGui::SliderFloat("Fov", &Settings::aimbot::aim_fov, 1, 120);
+			ImGui::SliderFloat("Field Of View", &Settings::aimbot::aim_fov, 1, 120);
 			ImGui::Spacing();
 			ImGui::Spacing();
 			ImGui::SliderFloat("Smooth", &Settings::aimbot::smooth, 1, 120);
