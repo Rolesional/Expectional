@@ -16,21 +16,21 @@ float originalFOV = 68.0f;
 
 namespace offsets
 {
-std::ptrdiff_t dwEntityList = 0x17ADAF0;
-   std::ptrdiff_t dwViewMatrix = 0x180C100;
-   std::ptrdiff_t dwLocalPlayerController = 0x17FCDC8;
-   std::ptrdiff_t dwLocalPlayerPawn = 0x16B9388;
+std::ptrdiff_t dwEntityList = 0x17B0CF0;
+   std::ptrdiff_t dwViewMatrix = 0x180F330;
+   std::ptrdiff_t dwLocalPlayerController = 0x1800008;
+   std::ptrdiff_t dwLocalPlayerPawn = 0x16BC4A8;
 
-   std::ptrdiff_t dwPawnHealth = 0x7E0; //m_iPawnHealth client.dll.rs
-   std::ptrdiff_t dwPlayerPawn = 0x7D4; //m_hPlayerPawn client.dll.rs
-   std::ptrdiff_t dwSanitizedName = 0x738; //m_sSanitizedPlayerName cleint.dll.rs
+   std::ptrdiff_t dwPawnHealth = 0x7F8; //m_iPawnHealth client.dll.rs
+   std::ptrdiff_t dwPlayerPawn = 0x7EC; //m_hPlayerPawn client.dll.rs
+   std::ptrdiff_t dwSanitizedName = 0x750; //m_sSanitizedPlayerName cleint.dll.rs
    std::ptrdiff_t m_bDormant = 0xE7; //m_bDormant 
    std::ptrdiff_t m_iTeamNum = 0x3bf; //m_iTeamNum
    std::ptrdiff_t m_vecOrigin = 0x1224; //m_vOldOrigin client.dll.rs
    std::ptrdiff_t m_iHealth = 0x32C; //m_iHealth client.dll.rs
    std::ptrdiff_t  m_flDetectedByEnemySensorTime = 0x13DC;
    std::ptrdiff_t   m_ArmorValue = 0x1508;
-   std::ptrdiff_t   m_iCompetitiveWins = 0x75C;
+   std::ptrdiff_t   m_iCompetitiveWins = 0x774;
 }
 
 namespace Settings
