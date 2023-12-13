@@ -16,10 +16,10 @@ float originalFOV = 68.0f;
 
 namespace offsets
 {
-std::ptrdiff_t dwEntityList = 0x17B0CF0;
-   std::ptrdiff_t dwViewMatrix = 0x180F330;
-   std::ptrdiff_t dwLocalPlayerController = 0x1800008;
-   std::ptrdiff_t dwLocalPlayerPawn = 0x16BC4A8;
+std::ptrdiff_t dwEntityList = 0x17BB840;
+   std::ptrdiff_t dwViewMatrix = 0x1819FE0;
+   std::ptrdiff_t dwLocalPlayerController = 0x180ACC0;
+   std::ptrdiff_t dwLocalPlayerPawn = 0x16C2D98;
 
    std::ptrdiff_t dwPawnHealth = 0x7F8; //m_iPawnHealth client.dll.rs
    std::ptrdiff_t dwPlayerPawn = 0x7EC; //m_hPlayerPawn client.dll.rs
