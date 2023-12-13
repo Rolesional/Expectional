@@ -342,7 +342,7 @@ void drawmenu() {
 
 		ImGui::Begin(("Expectional (Undetected)"), 0, ImGuiWindowFlags_::ImGuiWindowFlags_NoResize | ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse);
 		(ImGui::Text("Welcome!", ImVec2()));
-		(ImGui::Text("Version: 1.7"));
+		(ImGui::Text("Version: 1.8"));
 		ImGui::Checkbox("Aimbot", &Settings::aimbot::aimbot);
 		if (Settings::aimbot::aimbot) {
 			ImGui::SliderFloat("Field Of View", &Settings::aimbot::aim_fov, 1, 120);
@@ -374,7 +374,7 @@ void drawmenu() {
 			exit(0);
 		}
 		(ImGui::Text(""));
-		(ImGui::Text("By Rolesional Btw"));
+		(ImGui::Text("delicious food By singhhdev and Rolesional <3"));
 
 
 			if (tab == 3)			// deleted features (not working dont care)
