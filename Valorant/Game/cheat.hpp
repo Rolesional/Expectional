@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "C:\Users\GameX\Downloads\roleswarekernel__1_xdsr\roleswarekernel (1)xdsr\cs2_usermode\Valorant\Overlay/render.hpp" //pls change this location on ur pc dont ask me on discord
+#include "..\Overlay\render.hpp" //fixed blaaah!
 
 using namespace ColorStructs;
 
