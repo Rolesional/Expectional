@@ -53,32 +53,14 @@
     <ClCompile Include="Game\catalyst_world_bvh.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_crypto.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_hwid.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_antidebug.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_ws.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_tcp.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_report.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_login_ui.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\lic_wire.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
-    <ClCompile Include="LicenseGuard\src\LicenseGuard.cpp">
-      <Filter>LicenseGuard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -166,38 +148,16 @@
     <ClInclude Include="Driver\driver.hpp">
       <Filter>Driver</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\LicenseGuard.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_xor.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_json.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_crypto.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_hwid.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_antidebug.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_ws.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_tcp.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_report.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_login_ui.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
-    <ClInclude Include="LicenseGuard\include\lic_wire.hpp">
-      <Filter>LicenseGuard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +173,6 @@
     <Filter Include="Overlay">
       <UniqueIdentifier>{39406d82-fe78-47f5-8e04-b83774d34cd4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="LicenseGuard">
       <UniqueIdentifier>{c1b4f2a0-7e5b-4d3a-9f12-8c6a0e5b1d77}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

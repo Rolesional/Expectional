@@ -51,7 +51,7 @@ void VoteRevealWorkerLoop() noexcept
 	}
 }
 
-} // namespace
+} 
 
 void ExpectionalRevealWorkersEnsureStarted() noexcept
 {

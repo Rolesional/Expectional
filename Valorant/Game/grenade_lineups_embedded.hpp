@@ -1,12 +1,5 @@
 #pragma once
 
-/**
- * Gomulu grenade lineup satirlari:
- *   throw|map|name|sx|sy|sz|ax|ay|az|tx|ty|tz|nadeKind
- * nadeKind: smoke | molotov | flash | he | decoy (kucuk harf)
- * Calisma zamani otomatik duplike silme yok; liste ne ise o yuklenir.
- * Kaynak: C:\Users\HASAN\Discidoktorukernelkorumasi31\lineupsreal (10 txt, 466 lineup satiri)
- */
 namespace expectional_embedded_lineups {
 
 inline constexpr const char* const kBundledPipeLines[] = {
@@ -479,4 +472,4 @@ inline constexpr const char* const kBundledPipeLines[] = {
 	nullptr,
 };
 
-} // namespace expectional_embedded_lineups
+} 

@@ -29,30 +29,9 @@
 #include "Game/votekick_reveal.hpp"
 #include "AnanbabanOverlay/expectional_ananbaban_overlay.hpp"
 
-#include "LicenseGuard/include/LicenseGuard.hpp"
-#include "LicenseGuard/include/lic_xor.hpp"
-
 #include <TlHelp32.h>
 #include <cstdio>
 #include <ctime>
-
-/** NO-AUTH / NO-VXLANG build: tum vxlang sarmalari kaldirildi (kasma kaynagi). */
-
-/** expectional.dev /download/version.txt ile eslesmeli. */
-static constexpr const char* kExpectionalClientVersion = "1.20";
-
-#if defined(USE_VL_MACRO)
-static bool ExpectionalLicStartSeh(const lic::StartOptions& opts, bool* crashed)
-{
-	*crashed = false;
-	__try {
-		return lic::Start(opts);
-	} __except (EXCEPTION_EXECUTE_HANDLER) {
-		*crashed = true;
-		return false;
-	}
-}
-#endif
 
 static void FatalErrorExit(const char* message)
 {
@@ -76,7 +55,6 @@ inline bool ExpectionalIsCs2ProcessRunning()
 	return GetProcessID(L"cs2.exe") != 0;
 }
 
-/** CS2 attached PID alive: kernel read at image base / PEB (no Toolhelp). */
 inline bool ExpectionalIsProcessAlive(DWORD pid)
 {
 	if (!pid)
@@ -161,7 +139,6 @@ getpid_leave:
 #endif
 }
 
-/** catalyst combat thread — 512 Hz; inis kenari + PostMessage ile gecikme minimum. */
 static void ExpectionalBhopThreadEntry()
 {
 	timeBeginPeriod(1);
@@ -184,9 +161,6 @@ static void ExpectionalBhopThreadEntry()
 	}
 }
 
-/**
- * Standalone EXE entry — tum boot mantigi ExpectionalMainEntry icinde.
- */
 static int ExpectionalMainEntry();
 
 int main()
@@ -203,23 +177,6 @@ static int ExpectionalMainEntry()
 		printf(">  expectional starting... \n");
 
 		printf("> waiting for counter strike 2...\n");
-
-		std::string versionStr;
-		if (!HttpGetExpectionalDev(L"/download/version.txt", versionStr)) {
-			FatalErrorExit("Failed to check version! Check your internet connection.");
-			return 0;
-		}
-
-		// Trim string to remove any trailing newlines or spaces
-		while (!versionStr.empty() && (unsigned char)versionStr.back() <= ' ')
-			versionStr.pop_back();
-		while (!versionStr.empty() && (unsigned char)versionStr.front() <= ' ')
-			versionStr.erase(0, 1);
-			
-		if (versionStr != kExpectionalClientVersion) {
-			FatalErrorExit("Version mismatch! Please run the launcher to update Expectional.");
-			return 0;
-		}
 
 		while (Entryhwnd == NULL) {
 #if defined(EXPECTIONAL_USE_R69)
@@ -263,7 +220,6 @@ static int ExpectionalMainEntry()
 			break;
 		}
 
-		/** Driver mutex'i overlay render thread'i bloklamasin — yardimci threadleri BELOW_NORMAL'a al. */
 		{
 			std::thread cg(cacheGame);
 			SetThreadPriority(cg.native_handle(), THREAD_PRIORITY_BELOW_NORMAL);

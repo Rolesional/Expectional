@@ -4,7 +4,6 @@
 #include <ostream>
 #include <string>
 
-/** Aim + trigger + RCS — kategori profili veya General (Settings). */
 struct LegitCombatSettings {
 	bool aimbot = false;
 	bool triggerbot = false;
@@ -40,7 +39,7 @@ struct LegitCombatSettings {
 	float rcs_scale_pct = 100.f;
 	float rcs_sens_mult = 1.f;
 	float rcs_smooth = 22.f;
-	/** Eski cfg uyumu; menu yok — tek Strength % kullanilir. */
+	
 	float rcs_aim_blend_pct = 100.f;
 };
 
@@ -79,15 +78,13 @@ void NotifyMenuCombatSettingEdited();
 void OnMenuCategoryChanged(int prev_idx, int new_idx);
 void EnsureEditorCategoryProfile(WeaponCategory cat);
 
-/** 0=General -> nullptr (Settings::aimbot); diger kategoriler -> profil satiri. */
 LegitCombatSettings* MutEditorProfileRow();
 
 int CategoryCount();
 const char* CategoryKey(int index);
 const char* CategoryLabel(int index);
 
-/** Geriye uyumluluk — eski menu cagrilari. */
 inline LegitCombatSettings* MutEditorProfileRowForAim() { return MutEditorProfileRow(); }
 inline LegitCombatSettings* MutEditorProfileRowForTrigger() { return MutEditorProfileRow(); }
 
-} // namespace WeaponRuntime
+} 

@@ -1,4 +1,3 @@
-/** CS2-External-Base overlay + Expectional render() callback. */
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -63,7 +62,6 @@ static void ExpectionalImGuiIniLoad()
 		ImGui::LoadIniSettingsFromMemory(reinterpret_cast<const char*>(bytes.data()), bytes.size());
 	}
 
-	/** UWP Notepad: stdio/fopen imgui.ini yazamaz — Win32 ile poll save. */
 	ImGui::GetIO().IniFilename = nullptr;
 }
 
@@ -82,7 +80,7 @@ static void ExpectionalImGuiIniWriteMemory()
 	ImGui::GetIO().WantSaveIniSettings = false;
 }
 
-} // namespace
+} 
 
 void ExpectionalOverlayImGuiIniPollSave()
 {
@@ -130,16 +128,6 @@ bool ExpectionalAnanbabanOverlayRun(HWND gameHwnd, const std::function<void()>& 
 	ExpectionalOverlayInitImGuiExtras();
 	SetForegroundWindow(GameWnd);
 
-	/**
-	 * STABILITE / NOTEPAD-HOST FIX:
-	 * - Non-elevated notepad icinde render thread'i default NORMAL'da kaliyor,
-	 *   diger threadler ile esit quantum aliyor -> notepad'in mesaj/IO threadleri
-	 *   yuzunden gozle gorulur stutter cikiyor.
-	 * - timeBeginPeriod(1): system-wide timer res. 1 ms (Sleep granuleritesi dusurur).
-	 * - SetThreadPriority(ABOVE_NORMAL): render thread'i baska threadlerden once cizebilsin.
-	 * - AvSetMmThreadCharacteristics("Games"): MMCSS oyun moduna sok (UE/Unity'nin yaptigi)
-	 *   - admin gerektirmez, scheduler 8 ms'lik bir glitch bandwidth garantisi verir.
-	 */
 	timeBeginPeriod(1);
 	const HANDLE hRenderThread = GetCurrentThread();
 	const int prevPrio = GetThreadPriority(hRenderThread);

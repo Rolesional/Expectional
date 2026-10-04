@@ -31,7 +31,7 @@ constexpr DWORD kRadarProtocolVersion = 2;
 
 inline int PublishIntervalMs() noexcept
 {
-	/* ~60 Hz; save_fps modunda ~30 Hz (eskiden 50/90 ms gecikme hissi coktu). */
+	
 	return Settings::misc::save_fps ? 33 : 16;
 }
 
@@ -88,7 +88,6 @@ void JsonEscape(const std::string& in, std::string& out) {
 	}
 }
 
-/** CNetworkGameClient::map_name / map_path (Valthrun cs2 schema; engine2). */
 static void NormalizeRadarWorldName(std::string& s) {
 	while (!s.empty() && (unsigned char)s.back() <= ' ') s.pop_back();
 	while (!s.empty() && (unsigned char)s.front() <= ' ') s.erase(0, 1);
@@ -124,7 +123,6 @@ uint16_t ReadWeaponDefIndex(uintptr_t pawn) {
 	return ex_esp::ReadWeaponDefIndex(pawn);
 }
 
-/** Valthrun: `m_vecAbsOrigin` uzerinden game scene node — harita ile hizali dunya konumu. */
 static UE4Structs::Vector3 ReadEntityWorldPositionForRadar(uintptr_t entity) {
 	if (!entity)
 		return {};
@@ -138,7 +136,6 @@ static UE4Structs::Vector3 ReadEntityWorldPositionForRadar(uintptr_t entity) {
 	return {};
 }
 
-/** QAngle yaw (deg); Valthrun `m_angEyeAngles()[1]` — radar ikon donusu. */
 static float ReadPawnEyeYawDegrees(uintptr_t pawn) {
 	if (!pawn || !offsets::m_angEyeAngles)
 		return 0.f;
@@ -161,7 +158,6 @@ static bool PlantedC4FieldsSane(uintptr_t bomb) {
 	return blow > 0.5f && blow < 100000.f;
 }
 
-/** dwPlantedC4 bazen entity, bazen entity* . Hangisinde patlama zamani duruyorsa o. */
 static uintptr_t ResolvePlantedC4Entity() {
 	if (!client || !offsets::dwPlantedC4)
 		return 0;
@@ -212,7 +208,6 @@ static void NoteDroppedC4(int entityIndex, const UE4Structs::Vector3& pos) {
 	g_droppedC4.seenTick = GetTickCount64();
 }
 
-/** Tasinan bomba yokken yerdeki C4'u parca parca tara (radar thread). */
 static void TickDroppedC4Scan() {
 	if (!client || !offsets::dwEntityList)
 		return;
@@ -366,7 +361,6 @@ std::string BuildPlantedC4JsonOrEmpty(const std::vector<UE4Structs::CS2Entity>* 
 	return std::string(buf);
 }
 
-/** PlayerList yerel pawn'i ESP icin atlar. Valthrun kendi ikonunu playerPawns icinden cizer. */
 static void AppendLocalPlayerRadarJson(std::string& j, bool& first, const std::vector<UE4Structs::CS2Entity>& snapshot) {
 	if (!global_pawn || global_pawn < 0x10000ull || !offsets::m_iHealth)
 		return;
@@ -628,7 +622,6 @@ bool WsSendText(HINTERNET ws, const std::string& utf8) {
 	return r == ERROR_SUCCESS;
 }
 
-/** Sunucu ack'lerini bloklamadan bosalt; tam mesaj gelirse true. */
 static bool WsDrainPendingNonBlocking(HINTERNET ws, std::string* outComplete = nullptr) {
 	DWORD timeout = 0;
 	(void)WinHttpSetOption(ws, WINHTTP_OPTION_RECEIVE_TIMEOUT, &timeout, sizeof(timeout));
@@ -866,7 +859,7 @@ void CloudRadarWorker() {
 	}
 }
 
-} // namespace
+} 
 
 void cloud_radar_start_thread() {
 	bool e = false;
@@ -879,10 +872,7 @@ void cloud_radar_render_menu_misc() {
 	ImGui::Separator();
 	ImGui::TextUnformatted("Cloud Radar");
 	ImGui::Checkbox("Enable##cloudradar", &Settings::misc::cloudRadar);
-	//ImGui::InputText("Publish URL##crurl", Settings::misc::cloudRadarPublishUrl,
-		//sizeof(Settings::misc::cloudRadarPublishUrl));
-	//ImGui::InputText("Viewer sayfa (expectional.dev/radar)##crview", Settings::misc::cloudRadarViewerBase,
-		//sizeof(Settings::misc::cloudRadarViewerBase));
+	
 	std::string status, url;
 	{
 		std::lock_guard<std::mutex> lk(g_status_mtx);
@@ -892,5 +882,5 @@ void cloud_radar_render_menu_misc() {
 	ImGui::TextWrapped("%s", status.c_str());
 	if (!url.empty() && ImGui::SmallButton("Copy viewer URL##crd"))
 		ImGui::SetClipboardText(url.c_str());
-	//ImGui::TextDisabled("Protokol: Valthrun radar v2 (JSON). Varsayilan yayin sunucusu.");
+	
 }

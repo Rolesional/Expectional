@@ -16,7 +16,6 @@ namespace {
 
 enum class WpnKind : uint8_t { None, Rifle, Smg, Pistol, Heavy };
 
-/** UC #749251 — CCSPlayer_AimPunchServices icinde CUtlVector (aim punch history); son Vector3. */
 constexpr std::ptrdiff_t kAimPunchCacheUtlRel = 0x88;
 
 static void ExpectionalMouseMoveRel(int dx, int dy) {
@@ -104,7 +103,7 @@ static double g_rcsAccumMouseY = 0.0;
 static double g_rcsLpDx = 0.0;
 static double g_rcsLpDy = 0.0;
 static ULONGLONG g_rcsLastShotTick = 0;
-/** Mermi artmadan biriken asagi hareket. Yeni mermi gelirse uygulanir, spray biterse silinir. */
+
 static double g_holdDown = 0.0;
 
 static int ClampI(int v, int lo, int hi) {
@@ -117,7 +116,7 @@ static void RcsSmoothReset() {
 
 static void RcsAccumulateSmoothed(double rawMx, double rawMy, float rcs_smooth) {
 	const float sm = (std::max)(rcs_smooth, 2.f);
-	/** alpha capped below 1 — smooth slider artik varsayiland da hissedilir (eskiden sm<=22 tam tepkiydi). */
+	
 	const float a = std::clamp(16.f / sm, 0.05f, 0.92f);
 	const double ad = static_cast<double>(a);
 	g_rcsLpDx = g_rcsLpDx * (1.0 - ad) + rawMx * ad;
@@ -127,7 +126,7 @@ static void RcsAccumulateSmoothed(double rawMx, double rawMy, float rcs_smooth) 
 }
 
 static void RcsEmitAccumulatedMouse() {
-	/** Birikim iki yone de ayni tavanda. Tek karelik cop okuma asagi da yukari da firlatmasin. */
+	
 	constexpr double kMaxDebt = 16.0;
 	g_rcsAccumMouseX = std::clamp(g_rcsAccumMouseX, -kMaxDebt, kMaxDebt);
 	g_rcsAccumMouseY = std::clamp(g_rcsAccumMouseY, -kMaxDebt, kMaxDebt);
@@ -162,10 +161,6 @@ static bool ReadVec2(uintptr_t addr, float* ox, float* oy) {
 	return true;
 }
 
-/**
- * Oncelik: AimPunchServices+0x88 CUtlVector son Vector3 (UC #749251).
- * Sonra predictable / unpredictable; en son pawn m_aimPunchAngle.
- */
 static bool ReadBestAimPunch(uintptr_t local_pawn, float* apx, float* apy, char* src) {
 	*apx = 0.f;
 	*apy = 0.f;
@@ -234,12 +229,6 @@ static void ApplyPunchDeltaRcs(const LegitCombatSettings& cfg, float apx, float 
 	const float strength =
 		2.f * (cfg.rcs_scale_pct / 100.f) * cfg.rcs_sens_mult * pathSoft * aim_blend_mult;
 
-	/**
-	 * Punch kaynagi (C/P/U/L) frame'ler arasi degisince olcek/anlam farkli olur.
-	 * Onceki frame'in oldPx/oldPy'si baska kaynaktan geldiyse delta cop cikar,
-	 * tek frame'de mouse yukari zıplar. Kaynak degisiminde baseline'i yenile,
-	 * bu frame delta emit etme (bir sonraki frame'den itibaren temiz delta).
-	 */
 	if (g_lastPunchSrc != 0 && g_lastPunchSrc != punchSrc) {
 		g_oldPx = apx;
 		g_oldPy = apy;
@@ -249,7 +238,6 @@ static void ApplyPunchDeltaRcs(const LegitCombatSettings& cfg, float apx, float 
 	}
 	g_lastPunchSrc = punchSrc;
 
-	/** Punch kuculuyorsa spray bitti, nişan geri toplanmasin. Oldugu yerde kal. */
 	const float oldMag = g_oldPx * g_oldPx + g_oldPy * g_oldPy;
 	const float newMag = apx * apx + apy * apy;
 	if (newMag < oldMag) {
@@ -263,12 +251,11 @@ static void ApplyPunchDeltaRcs(const LegitCombatSettings& cfg, float apx, float 
 	const float delta_x = -(apx - g_oldPx);
 	const float delta_y = -(apy - g_oldPy);
 
-	/** Tek frame'de asiri buyuk delta (garbage read / ilk atış degiskeni) — atla + accum temizle. */
 	constexpr float kMaxPunchDeltaDeg = 6.f;
 	if (std::fabs(delta_x) > kMaxPunchDeltaDeg || std::fabs(delta_y) > kMaxPunchDeltaDeg) {
 		g_oldPx = apx;
 		g_oldPy = apy;
-		/** Cop delta lowpass'a taşımasin diye bu frame'de smoothing sifirla. */
+		
 		RcsSmoothReset();
 		return;
 	}
@@ -277,7 +264,7 @@ static void ApplyPunchDeltaRcs(const LegitCombatSettings& cfg, float apx, float 
 		(static_cast<double>(sens) * -0.022);
 	double myF = static_cast<double>(delta_x) * static_cast<double>(strength) /
 		(static_cast<double>(sens) * 0.022);
-	/** Yukari ve asagi ayni tavan. Spray oturur, tek karede zipzamaz. */
+	
 	constexpr double kMaxRaw = 28.0;
 	mxF = std::clamp(mxF, -kMaxRaw, kMaxRaw);
 	myF = std::clamp(myF, -kMaxRaw, kMaxRaw);
@@ -286,7 +273,7 @@ static void ApplyPunchDeltaRcs(const LegitCombatSettings& cfg, float apx, float 
 		g_holdDown = 0.0;
 		myF = std::clamp(myF, -kMaxRaw, kMaxRaw);
 	}
-	/** Son mermiden sonra punch bir sure daha buyur. Bunu hemen basmak spray sonunda asagi atar. */
+	
 	if (!shotAdvanced && myF > 0.0) {
 		g_holdDown = std::clamp(g_holdDown + myF, 0.0, kMaxRaw);
 		myF = 0.0;
@@ -302,7 +289,7 @@ static void ApplyPunchDeltaRcs(const LegitCombatSettings& cfg, float apx, float 
 	g_oldPy = apy;
 }
 
-} // namespace
+} 
 
 namespace RCS {
 
@@ -336,10 +323,6 @@ void SyncBaseline(uintptr_t local_pawn) {
 	}
 }
 
-/**
- * 1) Aim punch okunabiliyorsa (oncelikle services+0x88 CUtlVector — UC #749251) delta RCS.
- * 2) Degilse ShotsFired + tahmini sablon.
- */
 void Tick(uintptr_t local_pawn, const LegitCombatSettings& cfg, bool rcs_may_run,
 	bool aimbot_hard_lock, bool spray_rcs_coop, bool ananbaban_merge) {
 	if (!cfg.rcs_enabled || !local_pawn || Settings::bMenu)
@@ -380,11 +363,7 @@ void Tick(uintptr_t local_pawn, const LegitCombatSettings& cfg, bool rcs_may_run
 	if (!lmb || !rcs_may_run) {
 		g_estPrevShots = shots;
 		g_rcsLastShots = shots;
-		/**
-		 * LMB bırakılınca / RCS gate kapaninca artikta kalan smoothing lowpass ve
-		 * micro-accum'u sifirla. Kalan birikim bir sonraki spray'in ilk frame'inde
-		 * mouse'u sag/asagi hafifce kaydirabilir ("rare drift" bugu).
-		 */
+		
 		g_rcsAccumMouseX = g_rcsAccumMouseY = 0.0;
 		RcsSmoothReset();
 		char ps = '?';
@@ -443,7 +422,6 @@ void Tick(uintptr_t local_pawn, const LegitCombatSettings& cfg, bool rcs_may_run
 	float apy = 0.f;
 	const bool havePunch = ReadBestAimPunch(local_pawn, &apx, &apy, &punchSrc);
 
-	/** Mermi artmayi birakinca (spray bitti / sarjor bos) punch geri toplanirken mouse'u oynatma. */
 	constexpr ULONGLONG kSprayIdleMs = 140;
 	if (nowTick - g_rcsLastShotTick > kSprayIdleMs) {
 		g_holdDown = 0.0;
@@ -511,4 +489,4 @@ void Tick(uintptr_t local_pawn, const LegitCombatSettings& cfg, bool rcs_may_run
 	RcsEmitAccumulatedMouse();
 }
 
-} // namespace RCS
+} 

@@ -714,7 +714,6 @@ bool Project(const XMFLOAT4X4& m, float x, float y, float z, const ImVec2& origi
 	return true;
 }
 
-/** Mesh dilimlerinden: kafa +Y, kollar govde yaninda asili, bacaklar ayrik. */
 void BoneLocal(int id, float& x, float& y, float& z)
 {
 	x = 0.f;
@@ -974,7 +973,7 @@ void RenderModel(ID3D11DeviceContext* ctx, int w, int h, XMFLOAT4X4& outMvp)
 {
 	const XMMATRIX rot = XMMatrixRotationRollPitchYaw(g_pitch, g_yaw, 0.f);
 	const XMMATRIX trans = XMMatrixTranslation(g_panX, g_panY, 0.f);
-	/** LookAtLH ekranda X'i ters basar; yazinin duz okunmasi icin modeli aynalar. */
+	
 	const XMMATRIX world = XMMatrixScaling(-1.f, 1.f, 1.f) * rot * trans;
 	const XMVECTOR eye = XMVectorSet(0.f, 0.28f, g_dist, 0.f);
 	const XMVECTOR at = XMVectorSet(0.f, 0.02f, 0.f, 0.f);
@@ -1036,7 +1035,7 @@ void RenderModel(ID3D11DeviceContext* ctx, int w, int h, XMFLOAT4X4& outMvp)
 	ctx->OMSetRenderTargets(1, &nullRtv, nullptr);
 }
 
-} // namespace
+} 
 
 void ExpectionalDrawEspPreview()
 {

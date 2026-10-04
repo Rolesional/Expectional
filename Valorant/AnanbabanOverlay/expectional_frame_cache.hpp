@@ -1,5 +1,4 @@
 #pragma once
-/** Overlay render thread: kare basina bir kez ImGui/display cache (GetBackgroundDrawList azaltir). */
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -39,7 +38,6 @@ struct ExpectionalFrameCache {
 		center_y = static_cast<DWORD>(cy);
 	}
 
-	/** render.hpp global Width/Height/ScreenCenter — kare basina tek yazim. */
 	static void SyncScreenGlobals() noexcept;
 };
 

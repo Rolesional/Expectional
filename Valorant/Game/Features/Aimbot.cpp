@@ -20,7 +20,6 @@ float PixelFov(float cx, float cy, const UE4Structs::Vector3& screenPos) {
 	return std::sqrt(dx * dx + dy * dy);
 }
 
-/** ananbaban AimControl::Humanize — ekran piksel farkına uygulanır. */
 static std::pair<float, float> HumanizeDelta(float targetX, float targetY, int strengthInt) {
 	const float strength = static_cast<float>(strengthInt);
 	const float humanizationAmount = strength * 2.f / 100.f;
@@ -62,7 +61,7 @@ static std::pair<float, float> HumanizeDelta(float targetX, float targetY, int s
 		smoothedY + microJitterY + jitterY + perpY
 	};
 }
-} // namespace
+} 
 
 namespace AimControl {
 
@@ -164,9 +163,9 @@ bool RunLegitMouse(float screenCx, float screenCy, bool aimKeyHeld, bool haveBes
 		spray_t = std::clamp(static_cast<float>(shots_fired - after) / 22.f, 0.f, 1.f);
 
 	float dx = aimScreen.x - screenCx;
-	/** CS2 ekran Y asagi artar; +dy hedefi asagi indirir (kafa ustunde kalma). */
+	
 	float aimTargetY = aimScreen.y;
-	/** Sıkma sırasında nişanı bilerek aşağı kaydırma. RCS zaten aşağı çekiyor. */
+	
 	if (rcs_ananbaban_merge && cfg.aimbot && !cfg.rcs_standalone && shots_fired <= after)
 		aimTargetY += 9.f;
 	float dy = aimTargetY - screenCy;
@@ -184,10 +183,6 @@ bool RunLegitMouse(float screenCx, float screenCy, bool aimKeyHeld, bool haveBes
 			dy = 0.f;
 	}
 
-	/**
-	 * ananbaban / Catalyst tarzi spray: hedef nokta aim ile secilir, dikey recoil RCS (punch) toplar.
-	 * Dikeyde hitbox'a kitlenmek RCS ile carpisir — spray'de Y takibini kapat, sadece X takip.
-	 */
 	if (spray_t > 0.f) {
 		const float vyKeep = 1.f - spray_t;
 		dy *= vyKeep;
@@ -239,4 +234,4 @@ bool RunLegitMouse(float screenCx, float screenCy, bool aimKeyHeld, bool haveBes
 	return false;
 }
 
-} // namespace AimControl
+} 

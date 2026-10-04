@@ -35,7 +35,7 @@ static bool FirstMatchStr(const std::string& body, const std::regex& re, std::st
 	if (!std::regex_search(body, m, re) || m.size() < 2)
 		return false;
 	out = m[1].str();
-	/** Trim */
+	
 	while (!out.empty() && (unsigned char)out.front() <= ' ')
 		out.erase(0, 1);
 	while (!out.empty() && (unsigned char)out.back() <= ' ')
@@ -166,11 +166,6 @@ static std::string TrimWs(std::string s) {
 	return s;
 }
 
-/**
- * Top-level KV3 baslik cikarir: Title -> Name -> GroupName -> ChannelName.
- * MapAnnotationNodeX bloklarinin ICINDEKI Title'i atlamak icin, ilk node'dan
- * once kalan icerik araninir (eger varsa).
- */
 static std::string ExtractPackTitle(const std::string& text) {
 	size_t scan_end = text.size();
 	{
@@ -195,7 +190,7 @@ static std::string ExtractPackTitle(const std::string& text) {
 	if (t.empty()) t = try_key(reTitleStr);
 	if (t.empty()) t = try_key(reName);
 	if (t.empty()) t = try_key(reGroup);
-	/** Yeni satirlari kirp; tek satir baslik. */
+	
 	for (char& c : t) {
 		if (c == '\r' || c == '\n' || c == '\t') c = ' ';
 	}
@@ -295,7 +290,7 @@ static int InferThrowType(std::string blob, bool jumpThrowField) {
 	    d.find("jump throw") != std::string::npos || (d.find("jump") != std::string::npos && d.find("throw") != std::string::npos);
 	const bool forward = d.find("forward") != std::string::npos || d.find("+w") != std::string::npos ||
 	    d.find(" w ") != std::string::npos;
-	/** Python: \bw\b — kelime sinirinda w */
+	
 	bool wWord = false;
 	for (size_t i = 0; i < d.size(); ++i) {
 		if (d[i] != 'w')
@@ -802,7 +797,7 @@ static void ScanVpkLineupsCtx(const WorkshopScanCtx& ctx, const std::wstring& ro
 	});
 }
 
-} // namespace
+} 
 
 static void ProcessLooseLineupFile(const std::wstring& fileW, std::vector<ParsedRow>& out)
 {
@@ -859,4 +854,4 @@ void AppendAllFromWorkshopContent730(const std::wstring& ws730_root_wide, std::v
 	}
 }
 
-} // namespace grenade_lineup_workshop
+} 

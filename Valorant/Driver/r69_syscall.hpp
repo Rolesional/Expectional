@@ -1,9 +1,5 @@
 #pragma once
-/**
- * drayvir/r69-driver ile ayni kullanici-mod paketleri (communication_types.hpp ile senkron).
- * Surucu HAL hook'ta trap_frame->Rdx uzerinden c_packet* bekler; burada NtQueryAuxiliaryCounterFrequency
- * yanlis imzayla (dummy ULONGLONG* + c_packet*) cagrilarak MSVC'nin RDX=sanal ikinci arg kurali kullanilir.
- */
+
 #include <Windows.h>
 #include <winternl.h>
 #include <cstdint>
@@ -12,7 +8,6 @@
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 #endif
 
-/** drayvir communication_types.hpp ile ayni (alt tur belirtilmez — MSVC ile surucu sinifi es hizalar). */
 enum class e_syscall {
 	null = 0,
 	read_process_memory,

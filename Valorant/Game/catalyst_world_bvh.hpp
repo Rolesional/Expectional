@@ -1,8 +1,5 @@
 #pragma once
-/**
- * Catalyst (external) dunya mesh BVH + ray trace — gorunurluk LOS icin.
- * Implementasyon: catalyst_world_bvh.cpp (Kaynak: Catalyst systems::bvh)
- */
+
 #include "structs.hpp"
 #include <algorithm>
 #include <cmath>
@@ -13,7 +10,6 @@
 
 namespace ex_world_bvh {
 
-/** structs.hpp: Vector3 yalnizca UE4Structs icinde; MSVC bos isim ararken uyeler cozulmez. */
 using Vector3 = UE4Structs::Vector3;
 
 class bvh {
@@ -119,7 +115,6 @@ private:
 		std::int32_t tri_count{};
 	};
 
-	/** m_mutex unique_lock altinda cagir. */
 	void rebuild_accel_unlocked();
 	std::int32_t build_recursive(std::int32_t start, std::int32_t end, std::int32_t depth);
 
@@ -137,10 +132,8 @@ private:
 
 inline bvh g_world_bvh{};
 
-/** Tek seferlik arka plan .tri yukleme thread'i (VPK export yalnizca dosya yoksa). */
 void TickWorldBvhParse();
 
-/** Visible check + grenade trajectory: ayni g_world_bvh mesh'i. */
 inline bool WorldMeshReady() noexcept
 {
 	return g_world_bvh.valid() && g_world_bvh.count() > 0;
@@ -148,10 +141,8 @@ inline bool WorldMeshReady() noexcept
 
 void EnsureWorldBvhLoadThread() noexcept;
 
-/** Mevcut harita .tri dosyasini aninda yukle (tekrar VPK parse etmez). */
 bool TryLoadWorldMeshNow() noexcept;
 
-/** Debug accessors (sol ust paneli). */
 uintptr_t DbgClientModule();
 uintptr_t DbgVphysModule();
 uintptr_t DbgPatternTrace();
@@ -163,9 +154,6 @@ uint32_t  DbgParseAttempts();
 uint32_t  DbgParseSuccess();
 int       DbgLastExtracted();
 
-/**
- * Mesh yuklu varsayimiyla LOS (valid()/shared_lock YOK — esp basinda mesh_ready set edilir).
- */
 inline bool LosClearToImpl(const Vector3& eye_world, const Vector3& target_world) {
 	const float dx = target_world.x - eye_world.x;
 	const float dy = target_world.y - eye_world.y;
@@ -177,7 +165,7 @@ inline bool LosClearToImpl(const Vector3& eye_world, const Vector3& target_world
 	const float fx = dx * inv;
 	const float fy = dy * inv;
 	const float fz = dz * inv;
-	/** Oyuncu ic geometri / yanlis bone sapmalari icin guvenli bosluk (hammer birim). */
+	
 	const float k_from_eye = 18.f;
 	const float k_before_target = 38.f;
 	if (len <= k_from_eye + k_before_target + 12.f)
@@ -193,14 +181,10 @@ inline bool LosClearToImpl(const Vector3& eye_world, const Vector3& target_world
 	return !g_world_bvh.trace_ray(ray_start, ray_end).hit;
 }
 
-/**
- * Gozden hedefe LOS: ray'de isabet yoksa gorunur.
- * Yerel capsule / hedef govdesine takilmayi azaltmak icin bas ve son padlenir.
- */
 inline bool LosClearTo(const Vector3& eye_world, const Vector3& target_world) {
 	if (!g_world_bvh.valid())
 		return false;
 	return LosClearToImpl(eye_world, target_world);
 }
 
-} // namespace ex_world_bvh
+} 

@@ -17,11 +17,11 @@ namespace OSImGui
 		ID3D11DeviceContext* g_pd3dDeviceContext = nullptr;
 		IDXGISwapChain* g_pSwapChain = nullptr;
 		ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
-		/** ResizeBuffers son arg — olusturma ile ayni. */
+		
 		UINT m_swapChainFlags = 0u;
-		/** Legacy DISCARD yolu: Present(0, m_presentFlags). Flip yolunda kullanilmaz. */
+		
 		UINT m_presentFlags = 0u;
-		/** Flip + FRAME_LATENCY_WAITABLE: DWM ile senkron, minimum kuyruk gecikmesi. */
+		
 		bool m_useFlipModel = false;
 		HANDLE m_frameLatencyWaitable = nullptr;
 		bool CreateDeviceD3D(HWND hWnd);

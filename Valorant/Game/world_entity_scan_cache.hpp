@@ -1,22 +1,4 @@
 #pragma once
-/**
- * Optimized world entity enumeration + classification cache.
- *
- * Performans hedefi: dunya ESP (bomb / dropped weapon / world grenade / molotov hull)
- * her tick ayri ayri 2048 entity icin ~5 IOCTL'lik schema class name okumasi yaparak
- * IOCTL sayisini ~25,000+'a cikariyordu. Bu modul iki ana iyilestirme yapar:
- *
- *   1) BLOK BATCH IOCTL: entity list 512'lik bloklara bolunmus. Her blokun pointer
- *      tablosu (stride * 512 byte) tek bir km_device_read ile bir kerede okunur.
- *      Boylece 2048 entity icin enumerasyon 4 IOCTL'e duser (eskiden 2048 IOCTL).
- *
- *   2) CLASSIFY CACHE: ent_ptr -> (ident_ptr, kind, def_idx). Bir sonraki tick'te
- *      ident_ptr ile dogrulanir; ayni entity ise schema class name pointer chain
- *      (~5 IOCTL) ATLANir. Yeni entity'ler ya da geri donusumde tekrar siniflandirilir.
- *
- * Bu sayede steady-state'te (oyun gidiyor, entity'ler ayni) IOCTL maliyeti
- * ~30x dusurulur, RTX 4060 / dusuk-orta uc CPU'larda FPS dususu hissedilmez.
- */
 
 #include "../Driver/driver.hpp"
 #include "offsets_runtime.hpp"
@@ -34,9 +16,9 @@ namespace world_scan {
 
 enum class Kind : std::uint8_t {
 	Unknown = 0,
-	Irrelevant,     /**< Schema okundu, ilgisiz (skip et). Yeniden okumayalim. */
-	Bomb,           /**< C4 (def_idx == 49). */
-	DroppedWeapon,  /**< Normal silah, def_idx >= 1. */
+	Irrelevant,     
+	Bomb,           
+	DroppedWeapon,  
 	ProjHe,
 	ProjFlash,
 	ProjSmoke,
@@ -49,15 +31,15 @@ struct ClassifyEntry {
 	std::uintptr_t ident_ptr = 0;
 	Kind kind = Kind::Unknown;
 	std::uint16_t def_idx = 0;
-	std::uint32_t verify_tick = 0;     /**< Siniflandirmanin yapildigi tick (yenilenmez). */
-	std::uint32_t last_seen_tick = 0;  /**< Her PeekAndTouch / Lookup'ta guncellenir. */
+	std::uint32_t verify_tick = 0;     
+	std::uint32_t last_seen_tick = 0;  
 };
 
 class ClassifyCache {
 public:
-	/** Irrelevant entries: re-verify periyodu (~3-4 saniye scan tick'ine bagli). */
+	
 	static constexpr std::uint32_t kIrrelevantReverifyTicks = 90u;
-	/** Interesting entries: re-verify periyodu (cok daha uzun — class degismez). */
+	
 	static constexpr std::uint32_t kInterestingReverifyTicks = 600u;
 
 	bool Lookup(std::uintptr_t ent, std::uintptr_t ident_ptr, ClassifyEntry& out) {
@@ -65,7 +47,7 @@ public:
 		if (it == m_map.end())
 			return false;
 		if (it->second.ident_ptr != ident_ptr) {
-			/** Slot recycle — eski entry'yi sil, yeniden siniflandirilsin. */
+			
 			m_map.erase(it);
 			return false;
 		}
@@ -74,7 +56,7 @@ public:
 		                                   ? kIrrelevantReverifyTicks
 		                                   : kInterestingReverifyTicks;
 		if (age > reverify) {
-			/** TTL doldu — re-classify icin sil (transient classify failure'larini fixler). */
+			
 			m_map.erase(it);
 			return false;
 		}
@@ -83,11 +65,6 @@ public:
 		return true;
 	}
 
-	/**
-	 * FAST PATH: cache'de "Irrelevant" olarak isaretliyse identity dogrulama IOCTL'i atla.
-	 * Bu, taranan ~2000 entity'nin %95'i icin identProbe okumayi siler — en buyuk FPS kazanci.
-	 * TTL doldugunda re-classify icin entry silinir (slot recycle + spawn transient cozumu).
-	 */
 	bool PeekAndTouchIrrelevant(std::uintptr_t ent) {
 		auto it = m_map.find(ent);
 		if (it == m_map.end() || it->second.kind != Kind::Irrelevant)
@@ -107,7 +84,6 @@ public:
 		m_map[ent] = e;
 	}
 
-	/** Eski (kacmis / ortadan kalkmis) girisleri at. */
 	void Prune(std::uint32_t max_age_ticks) {
 		if (m_map.empty())
 			return;
@@ -136,18 +112,13 @@ private:
 inline ClassifyCache g_classify_cache;
 inline std::mutex g_classify_mtx;
 
-/**
- * Tek 512-slot blok pointer tablosunu BATCH okur.
- * Stride * 512 byte tek IOCTL — 64KB limitine sigar (stride genelde ~120).
- * Basarisiz olursa per-entity fallback.
- */
 inline int BatchReadEntityBlock(std::uintptr_t block_base, std::uint32_t stride,
                                  std::uintptr_t out_ptrs[512]) noexcept {
 	if (!block_base || stride == 0)
 		return 0;
 	const std::size_t total = static_cast<std::size_t>(stride) * 512u;
 	if (total > 0xF000u) {
-		/** Stride cok buyuk; fallback. */
+		
 		for (int s = 0; s < 512; ++s)
 			out_ptrs[s] = g_GameMem.readv<std::uintptr_t>(
 			    block_base + static_cast<std::uintptr_t>(stride) * s);
@@ -171,7 +142,6 @@ inline int BatchReadEntityBlock(std::uintptr_t block_base, std::uint32_t stride,
 	return 512;
 }
 
-/** Entity list'in blok-pointer tablosunu (16 blok x 8 byte) tek IOCTL'de okur. */
 inline int BatchReadBlockBases(std::uintptr_t entity_list, int blocks_needed,
                                 std::uintptr_t out_bases[16]) noexcept {
 	if (!entity_list || blocks_needed <= 0)
@@ -186,16 +156,11 @@ inline int BatchReadBlockBases(std::uintptr_t entity_list, int blocks_needed,
 	return n;
 }
 
-/**
- * Tum entity'leri (non-null, slot dolu) enumerator callback ile yurutur.
- * cb(idx, ent_ptr, user) — sadece gecerli pointer'lar icin cagrilir.
- * BATCH IOCTL ile ~2048 entity icin sadece ~4 syscall harcar.
- */
 template <typename Fn>
 inline void EnumerateLiveEntities(std::uintptr_t entity_list, int i_max, Fn&& cb) {
 	if (!entity_list || i_max <= 0)
 		return;
-	/** Stride: orijinal GameEntityByIndex ile ayni fallback (112) — yanlis stride = tum garbage. */
+	
 	const std::uint32_t stride = offsets::entity_controller_stride
 	                                 ? offsets::entity_controller_stride
 	                                 : 112u;
@@ -220,5 +185,5 @@ inline void EnumerateLiveEntities(std::uintptr_t entity_list, int i_max, Fn&& cb
 	}
 }
 
-}  // namespace world_scan
-}  // namespace ex_esp
+}  
+}  

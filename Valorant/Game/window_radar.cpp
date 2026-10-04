@@ -32,7 +32,6 @@ struct MapRadarDef {
 	double scale;
 };
 
-/** Valthrun `radar/web/src/map-info` + CS:GO `resource/overviews` (PNG yok; dunya->yuzde). */
 static const MapRadarDef kMapTable[] = {
 	{ "cs_office", -1838, 1858, 4.1 },
 	{ "cs_italy", -2647, 2592, 4.6 },
@@ -48,7 +47,7 @@ static const MapRadarDef kMapTable[] = {
 	{ "de_thera", -85.609764, 2261.8025, 4.85 },
 	{ "de_train", -2308, 2078, 4.082077 },
 	{ "de_vertigo", -3168, 1762, 4.0 },
-	/** Diger haritalar runtime'da `resource/overviews/<map>.txt`'ten okunur (stock + workshop hepsi). */
+	
 };
 
 static void NormalizeRadarWorldName(std::string& s) {
@@ -138,7 +137,6 @@ static void WorldToMapPercent(const MapRadarDef& m, const UE4Structs::Vector3& p
 	outPctY = static_cast<float>((p.y - m.pos_y) * 100.0 / -mapSize);
 }
 
-/** DragonBurn `Base_Radar::AddPoint`: mesafe * (2*RenderRange/Proportion), aci = yaw - atan2(hedef-local). */
 static ImVec2 WorldToRadarDragonBurn(const UE4Structs::Vector3& localWorld, float localYawDeg,
 	const UE4Structs::Vector3& targetWorld, float centerX, float centerY, float renderRangePx, float proportionWorld) {
 	const float dx = localWorld.x - targetWorld.x;
@@ -159,7 +157,7 @@ static ImVec2 RadarRotScreenPt(const ImVec2& p, const ImVec2& ctr, float yawDeg,
 		return p;
 	const float rad = yawDeg * (3.14159265f / 180.f);
 	const float dx = p.x - ctr.x, dy = p.y - ctr.y;
-	/** 4:3 dikdortgende piksel uzayi izotropik degil; once min kenar ile normalize et, dondur, sonra mapW/H ile geri. */
+	
 	const float denom = 0.5f * (std::min)(mapW, mapH);
 	if (denom < 1e-3f)
 		return p;
@@ -244,8 +242,7 @@ static void ComputeRadarMapBgUv(const MapRadarDef* def, bool haveLocalWorld, boo
 	const UE4Structs::Vector3& localWorld, ImVec2& outUv0, ImVec2& outUv1) {
 	outUv0 = ImVec2(0.f, 0.f);
 	outUv1 = ImVec2(1.f, 1.f);
-	/** UV crop yalniz `def` (tablo veya runtime override) varsa anlamlidir; planar modda blip'ler farkli formulden
-	 *  uretildigi icin texture'i da crop'larsak senkron bozulur — bu yuzden planar'da full uv ile birak. */
+	
 	if (!def || !wantFollow || !haveLocalWorld)
 		return;
 	UE4Structs::Vector3 localForRadar = localWorld;
@@ -374,7 +371,6 @@ static bool WindowRadarResolveBombDrawPos(UE4Structs::Vector3& outDraw) {
 	return false;
 }
 
-/** `MapRadarDef` yokken follow+zoom: DragonBurn yaricapini oyuncu/bom mesafesinden tahmin et. */
 static float EstimatePlanarFollowHalfSpanWorld(const UE4Structs::Vector3& origin) {
 	std::vector<UE4Structs::CS2Entity> snapshot;
 	{
@@ -421,7 +417,6 @@ struct WindowRadarBlipSnap {
 	bool is_local = false;
 };
 
-/** Tek IOCTL turu — kare icinde tutarli blip (cacheGame ile karisik okuma yok). */
 static void CollectWindowRadarBlips(std::vector<WindowRadarBlipSnap>& out) {
 	out.clear();
 	std::vector<UE4Structs::CS2Entity> snapshot;
@@ -463,7 +458,7 @@ static void RadarWindowAspectConstraint(ImGuiSizeCallbackData* d) {
 	float y = d->DesiredSize.y;
 	if (is43) {
 		constexpr float k43 = 4.f / 3.f;
-		/** Mevcut alandan kucultmek yerine BUYUK kenari sabit tut, kuçugu orana getirir. */
+		
 		if (y * k43 > x)
 			x = y * k43;
 		else
@@ -542,7 +537,7 @@ void window_radar_render_menu_misc() {
 	ImGui::Checkbox("Rotating Radar##rwrot", &Settings::misc::radarWindowRotateWithView);
 	ImGui::Checkbox("Hide Map Image##rwhidemap", &Settings::misc::radarWindowHideMapImage);
 	ImGui::SliderInt("Background Transparency##rwtransp", &Settings::misc::radarWindowTransparency, 0, 100, "%d%%");
-	/** Harita PNG her zaman acik (varsayilan). Menude artik HUD-match, Harita PNG, Durum, ust bilgi gosterilmiyor. */
+	
 	Settings::misc::radarWindowGameMapTex = true;
 	Settings::misc::radarWindowHudMatch = false;
 	Settings::misc::radarWindowDebugLog = false;
@@ -576,21 +571,20 @@ void window_radar_render_frame() {
 	const std::string& world = s_cached_world;
 	const MapRadarDef* def = LookupMapDef(world);
 
-	/** Runtime override: oyunun `resource/overviews/<world>.txt` dosyasi (stock + workshop) varsa tabloyu geçer. */
 	static MapRadarDef s_runtimeDef{};
 	static std::string s_runtimeDefId;
 	static bool s_runtimeDefValid = false;
 	static std::string s_runtimeWorld;
 	static DWORD s_runtimeProbeTick = 0;
 	const DWORD nowTickRadar = GetTickCount();
-	/** Workshop haritalar: yalnizca statik tabloda yoksa VPK tara (render thread kasmasin). */
+	
 	if (!def && !world.empty() && world != "<empty>") {
 		if (world != s_runtimeWorld) {
 			s_runtimeWorld = world;
 			s_runtimeDefValid = false;
 			s_runtimeProbeTick = 0;
 		}
-		/** Workshop VPK taramasi aglir; render thread'inde en fazla 750 ms'de bir dene, sonucu cache'le. */
+		
 		if (!s_runtimeDefValid && (nowTickRadar - s_runtimeProbeTick) > 750u) {
 			s_runtimeProbeTick = nowTickRadar;
 			double rt_px = 0.0, rt_py = 0.0, rt_sc = 0.0;
@@ -627,7 +621,7 @@ void window_radar_render_frame() {
 	const bool r43 = Settings::misc::radarWindow43;
 	ImVec2 initWin;
 	if (r43) {
-		/** Dis pencere tam 4:3 (padding sonrasi icerik de orana yaklasir). */
+		
 		const float outerH = initSide + chrome;
 		const float outerW = outerH * (4.f / 3.f);
 		initWin = ImVec2(outerW, outerH);
@@ -664,17 +658,6 @@ void window_radar_render_frame() {
 			haveLocalWorld = true;
 		}
 
-		/*
-		if (showHud) {
-			ImGui::TextDisabled("world: %s", world.c_str());
-			ImGui::TextDisabled("map table: %s", def ? def->map_id : "— (planar)");
-			if (g_ExpectionalMainDX11Device)
-				ImGui::TextDisabled("%s", WindowRadarMapTex_LastStatus());
-			else
-				ImGui::TextDisabled("%s", WindowRadarD3d9_LastStatus());
-		}
-		*/
-
 		const float avail = ImGui::GetContentRegionAvail().x;
 		const float availY = ImGui::GetContentRegionAvail().y;
 		float bw = 0.f, bh = 0.f;
@@ -690,7 +673,7 @@ void window_radar_render_frame() {
 			const float side = floorf((std::min)(avail, availY) + 0.5f);
 			bw = bh = (std::max)(64.f, side);
 		}
-		/** 1px layout titremesini azalt. */
+		
 		static float s_last_bw = 0.f, s_last_bh = 0.f;
 		if (s_last_bw > 0.f && std::fabsf(bw - s_last_bw) <= 1.f && std::fabsf(bh - s_last_bh) <= 1.f) {
 			bw = s_last_bw;
@@ -700,7 +683,6 @@ void window_radar_render_frame() {
 			s_last_bh = bh;
 		}
 
-		/** Tum icerik alani suruklenebilir; harita cizimi ortada kalir. */
 		ImGui::InvisibleButton("##radarmap", ImVec2(avail, availY));
 		ExpectionalHudDragFromLastItem("##radarmap_drag");
 		const ImVec2 itemMin = ImGui::GetItemRectMin();
@@ -732,7 +714,7 @@ void window_radar_render_frame() {
 		}
 
 		const bool rotMap = Settings::misc::radarWindowRotateWithView && wantFollow && global_pawn;
-		/** DragonBurn formulu ham `yaw_deg` bekler; overhead 90° offsetini texture fonksiyonu icinde uygular. */
+		
 		const float viewYawPlanar = rotMap ? ReadPawnEyeYawDegrees(global_pawn) : 0.f;
 		const float mapRef = (mapW + mapH) * 0.5f;
 		const float blipScl = (std::max)(0.28f, (std::min)(1.4f, Settings::misc::radarWindowBlipScale));
@@ -740,7 +722,7 @@ void window_radar_render_frame() {
 		const float blipR = (std::min)(12.f, (std::max)(2.3f, baseR * blipScl));
 		const float lineWorld = 48.f + 58.f * followZoomF;
 		const float bombR = blipR * 1.14f;
-		/** DragonBurn `proportion` = 2*halfSpan: tablo haritalarda `scale*1024` ile UV crop (follow) hizasi. */
+		
 		const float mapWorldUnits = def ? static_cast<float>(def->scale * 1024.0) : 0.f;
 		float halfSpanDragon;
 		if (mapWorldUnits > 1.f) {
@@ -930,7 +912,7 @@ void window_radar_render_frame() {
 			}
 		}
 
-		} // !drewHudMatch
+		} 
 
 		dl->PopClipRect();
 	}

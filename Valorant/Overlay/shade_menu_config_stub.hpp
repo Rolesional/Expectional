@@ -2,10 +2,6 @@
 
 #include "../../Includes/Imgui/imgui.h"
 
-
-
-/** Shade `Core/Config.h` — tek tanim: `menu_config_globals.cpp`. */
-
 namespace MenuConfig
 
 {
@@ -25,4 +21,3 @@ namespace MenuConfig
 	extern ImVec2 BombWinPos;
 
 }
-

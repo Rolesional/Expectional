@@ -74,38 +74,38 @@ namespace UE4Structs
 	{
 		uintptr_t Actor;
 		uintptr_t Controller;
-		/** dwPlayerPawn dusuk bit — uyumluluk. */
+		
 		std::uint32_t pawn_handle_low = 0;
-		/** Entity list slot i (1..63); spotted maske biti icin dwPlayerPawn yerine bu kullanilir. */
+		
 		int entity_index = 0;
 		int health;
 		int armor;
 		std::string name;
 		std::string weapon;
 		bool has_c4 = false;
-		/** CBasePlayerController::m_steamID (SteamID64). */
+		
 		std::uint64_t steam_id64 = 0;
-		/** CCSPlayerController — MM / skill; oyun guncellemesiyle anlami degisebilir. */
+		
 		int competitive_ranking = 0;
 		int competitive_wins = 0;
 		int competitive_rank_type = 0;
 		int rank_pred_win = 0;
 		int rank_pred_loss = 0;
 		int rank_pred_tie = 0;
-		/** C_CSPlayerPawn::m_iTeamNum (2=T, 3=CT); revealer renk + siralama. */
+		
 		int team_num = 0;
-		/** cacheGame: son bilinen dunya konumu (radar / cloud radar IOCTL azaltir). */
+		
 		float world_x = 0.f;
 		float world_y = 0.f;
 		float world_z = 0.f;
 		bool has_world_origin = false;
-		/** cacheGame: cloud radar icin tekrar IOCTL okumayi azaltir. */
+		
 		std::uint16_t weapon_def_index = 0;
 		float eye_yaw_deg = 0.f;
 	}CS2Entity;
 
 	inline std::vector<CS2Entity> PlayerList;
-	/** Rank Revealer: canli + olu (ESP listesi yalnizca canli). */
+	
 	inline std::vector<CS2Entity> PlayerListRankReveal;
 
 	struct view_matrix_t {
@@ -151,14 +151,13 @@ namespace UE4Structs
 	};
 	struct Vector3
 	{
-		// constructor
+		
 		constexpr Vector3(
 			const float x = 0.f,
 			const float y = 0.f,
 			const float z = 0.f) noexcept :
 			x(x), y(y), z(z) { }
 
-		// operator overloads
 		constexpr const Vector3& operator-(const Vector3& other) const noexcept
 		{
 			return Vector3{ x - other.x, y - other.y, z - other.z };
@@ -195,7 +194,6 @@ namespace UE4Structs
 			return x <= other.x && y <= other.y && z <= other.z;
 		}
 
-		// utils
 		constexpr const Vector3& ToAngle() const noexcept
 		{
 			return Vector3{
@@ -216,8 +214,6 @@ namespace UE4Structs
 		{
 			return x == 0.f && y == 0.f && z == 0.f;
 		}
-
-		
 
 		Vector3 world_to_screen(view_matrix_t matrix) const {
 			float _x = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z + matrix[0][3];
@@ -244,7 +240,6 @@ namespace UE4Structs
 			return { screen_x, screen_y, w };
 		}
 
-		// struct data
 		float x, y, z;
 	};
 
@@ -340,4 +335,3 @@ namespace ColorStructs
 	};
 	inline Color Col;
 }
-

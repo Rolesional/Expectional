@@ -14,7 +14,7 @@ namespace cat_mem {
 bool read(uintptr_t address, void* buffer, std::size_t size) {
 	if (!buffer || size == 0)
 		return false;
-	/** km_device_read tek pakette en fazla 0x10000 bayt (driver.cpp); pattern tarama 0x10000+overlap ister. */
+	
 	auto* p = static_cast<std::uint8_t*>(buffer);
 	std::uintptr_t addr = address;
 	std::size_t left = size;
@@ -43,7 +43,6 @@ uintptr_t resolve_rip(uintptr_t address, std::int32_t offset, std::int32_t lengt
 	return address + static_cast<uintptr_t>(length) + static_cast<uintptr_t>(rva);
 }
 
-/** Modul boyutu: kernel PE header (SizeOfImage). */
 static std::size_t module_image_size_from_pe(uintptr_t module_base) noexcept
 {
 	const IMAGE_DOS_HEADER dos = readv<IMAGE_DOS_HEADER>(module_base);
@@ -194,7 +193,7 @@ static std::vector<pattern_byte> parse_pattern(std::string_view pattern) {
 	return result;
 }
 
-} // namespace detail
+} 
 
 uintptr_t find_pattern(uintptr_t module_base, std::string_view pattern) {
 	if (!module_base || pattern.empty())
@@ -422,4 +421,4 @@ uintptr_t find_vtable_instance(uintptr_t module_base, std::string_view class_nam
 	return find_qword_in_sections(module_base, vtable, IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE);
 }
 
-} // namespace cat_mem
+} 

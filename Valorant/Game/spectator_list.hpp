@@ -18,7 +18,6 @@ namespace spectator_list {
 
 inline std::atomic<bool> g_scan_ready{ false };
 
-/** Sunucuya bagli (signOn >= 5); lobby/menu'de agir entity taramasi yapma. */
 inline bool Spectator_NetworkAllowsHeavyScan() noexcept
 {
 	const uintptr_t eng = g_GameMem.engine_address();
@@ -31,7 +30,6 @@ inline bool Spectator_NetworkAllowsHeavyScan() noexcept
 	return signOn >= 5;
 }
 
-/** Local pawn + entity list hazir olmadan spectator taramasi baslamasin. */
 inline bool Spectator_LocalPawnReadyForScan() noexcept
 {
 	if (!client || !offsets::dwLocalPlayerPawn || !offsets::dwEntityList)
@@ -57,7 +55,6 @@ inline bool Spectator_ReadyForScan() noexcept
 	return Spectator_LocalPawnReadyForScan();
 }
 
-/** Eski: m_hObserverTarget -> dogrudan izlenen pawn (ananbaban). */
 inline uintptr_t ResolveObserverTargetPawn(uintptr_t pawn) {
 	if (!pawn || !offsets::m_pObserverServices || !offsets::m_hObserverTarget)
 		return 0;
@@ -76,10 +73,6 @@ inline uintptr_t ResolveObserverTargetPawnFlat(uintptr_t pawn) {
 	return ResolveObserverTargetPawn(pawn);
 }
 
-/**
- * SDK onizleme: observer_target = m_hObserverTarget.get(); target_controller = observer_target->m_hController.get();
- * Izlenen CCSPlayerController adresi (entity list pointer).
- */
 inline uintptr_t ResolveSpectatedController(uintptr_t spectator_pawn) {
 	if (!spectator_pawn || !offsets::m_pObserverServices || !offsets::m_hObserverTarget)
 		return 0;
@@ -107,7 +100,6 @@ inline bool SpecBothInPlay(int hp) {
 	return hp > 0 && hp <= 100;
 }
 
-/** ananbaban CEntity::IsAlive: m_bPawnIsAlive==1 && hp>0 (controller + pawn). */
 inline bool DragonEntityAlive(uintptr_t controller, uintptr_t pawn) {
 	if (!pawn)
 		return false;
@@ -133,7 +125,6 @@ inline uintptr_t PawnFromControllerRow(uintptr_t entity_list, uintptr_t controll
 	return g_GameMem.readv<uintptr_t>(list_entry2 + stride * (playerpawn & 0x1FF));
 }
 
-/** CCSPlayerController::m_hObserverPawn — olum/spectate aktif pawn (C_CSObserverPawn). */
 inline uintptr_t ObserverPawnFromControllerRow(uintptr_t entity_list, uintptr_t controller) {
 	if (!entity_list || !controller || !offsets::m_hObserverPawn)
 		return 0;
@@ -147,10 +138,6 @@ inline uintptr_t ObserverPawnFromControllerRow(uintptr_t entity_list, uintptr_t 
 	return g_GameMem.readv<uintptr_t>(list_entry2 + stride * (hObsPawn & 0x1FF));
 }
 
-/**
- * m_hPlayerPawn ceset / proxy kalir; gercek izleme `m_hObserverPawn` uzerinde.
- * Canliyken observer pawn genelde bos veya oyuncu pawn'i kullanilir.
- */
 inline uintptr_t PawnForObserverChain(uintptr_t entity_list, uintptr_t controller, uintptr_t player_pawn) {
 	if (!player_pawn)
 		return 0;
@@ -191,7 +178,6 @@ inline void cache_loop() {
 			continue;
 		}
 
-		/** Menu acikken agir entity taramasi yapma — driver mutex + ImGui input cakismasi. */
 		if (Settings::bMenu) {
 			Sleep(450);
 			continue;
@@ -335,7 +321,6 @@ inline void draw_window() {
 	if (!hasSpecs && !menuOpen)
 		return;
 
-	/** En dar: "Spectators" basligi kadar; en genis: en uzun satir (Empty / oyuncu adi). */
 	const float title_w = ImGui::CalcTextSize("Spectators").x;
 	float line_w = 0.f;
 	if (menuOpen && copy.empty())
@@ -365,4 +350,4 @@ inline void draw_window() {
 	ImGui::End();
 }
 
-} // namespace spectator_list
+} 

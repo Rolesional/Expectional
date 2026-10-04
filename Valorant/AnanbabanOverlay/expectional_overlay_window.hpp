@@ -1,5 +1,4 @@
 #pragma once
-/** Overlay — eskisurum EXE mantigi (Notepad DLL icinde). */
 
 #include <Windows.h>
 #include <functional>
@@ -28,8 +27,7 @@ bool Create(HWND game_hwnd);
 bool RenderFrame(const std::function<void()>& frame_callback);
 void Destroy();
 
-/** eskisurum main_loop: bounds + GW_HWNDPREV z-order. */
 void HandleWindowOrder(HWND game_hwnd);
 
 unsigned GetTargetFrameHz() noexcept;
-} // namespace ExpectionalOverlayWindow
+} 

@@ -13,7 +13,6 @@
 
 #pragma comment(lib, "Shell32.lib")
 
-/** Eski SDK / dusuk WINVER: GWLP_EXSTYLE tanimsiz olabiliyor (GetWindowLongPtr icin -20 = GWL_EXSTYLE). */
 #ifndef GWLP_EXSTYLE
 #if defined(GWL_EXSTYLE)
 #define GWLP_EXSTYLE GWL_EXSTYLE
@@ -184,7 +183,6 @@ inline auto setup_window() -> void
 	UpdateWindow(MyWnd);
 }
 
-/** CS2 odagi cogu zaman ust HWND yerine cocukta (SDL); yalnizca hwnd==GameWnd bhop'u tamamen oldurur. */
 inline bool ExpectionalForegroundIsCs2Family() noexcept
 {
 	if (!GameWnd || !IsWindow(GameWnd))
@@ -202,7 +200,6 @@ inline bool ExpectionalForegroundIsCs2Family() noexcept
 	return pidGame != 0 && pidGame == pidFg;
 }
 
-/** Overlay ImGui DisplaySize -> FOV circle / aimbot / snapline merkezi (her kare). */
 inline void ExpectionalSyncScreenCenterFromImGui() noexcept
 {
 	const ImGuiIO& io = ImGui::GetIO();
@@ -256,17 +253,16 @@ void DrawFilledRect2(int x, int y, int w, int h, ImColor color)
 	ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(x, y), ImVec2(x + w, y + h), color, 0, 0);
 }
 
-
 void DrawNormalBox(int x, int y, int w, int h, int borderPx, RGBA* color)
 {
-	DrawFilledRect(x + borderPx, y, w, borderPx, color); //top 
-	DrawFilledRect(x + w - w + borderPx, y, w, borderPx, color); //top 
-	DrawFilledRect(x, y, borderPx, h, color); //left 
-	DrawFilledRect(x, y + h - h + borderPx * 2, borderPx, h, color); //left 
-	DrawFilledRect(x + borderPx, y + h + borderPx, w, borderPx, color); //bottom 
-	DrawFilledRect(x + w - w + borderPx, y + h + borderPx, w, borderPx, color); //bottom 
-	DrawFilledRect(x + w + borderPx, y, borderPx, h, color);//right 
-	DrawFilledRect(x + w + borderPx, y + h - h + borderPx * 2, borderPx, h, color);//right 
+	DrawFilledRect(x + borderPx, y, w, borderPx, color); 
+	DrawFilledRect(x + w - w + borderPx, y, w, borderPx, color); 
+	DrawFilledRect(x, y, borderPx, h, color); 
+	DrawFilledRect(x, y + h - h + borderPx * 2, borderPx, h, color); 
+	DrawFilledRect(x + borderPx, y + h + borderPx, w, borderPx, color); 
+	DrawFilledRect(x + w - w + borderPx, y + h + borderPx, w, borderPx, color); 
+	DrawFilledRect(x + w + borderPx, y, borderPx, h, color);
+	DrawFilledRect(x + w + borderPx, y + h - h + borderPx * 2, borderPx, h, color);
 }
 using namespace UE4Structs;
 
@@ -279,7 +275,6 @@ void DrawRect(int x, int y, int w, int h, RGBA* color, int thickness)
 {
 	ImGui::GetBackgroundDrawList()->AddRect(ImVec2(x, y), ImVec2(x + w, y + h), ImGui::ColorConvertFloat4ToU32(ImVec4(color->R / 255.0, color->G / 255.0, color->B / 255.0, color->A / 255.0)), 0, 0, thickness);
 }
-
 
 auto DrawDistance(Vector3 Location, float Distance) -> void
 {
@@ -337,10 +332,7 @@ void DrawCrossNazi(int buyukluk, DWORD color)
 	ImGui::GetBackgroundDrawList()->AddLine(ImVec2((float)(crosspozisyon - buyukluk), (float)crosspozisyony), ImVec2((float)(crosspozisyon - buyukluk), (float)(crosspozisyony - buyukluk)), ImColor(color));
 	ImGui::GetBackgroundDrawList()->AddLine(ImVec2((float)(crosspozisyon + buyukluk), (float)crosspozisyony), ImVec2((float)(crosspozisyon + buyukluk), (float)(crosspozisyony + buyukluk)), ImColor(color));
 }
-/**
- * Menü kapandiktan sonra klavye oyunda kalsin.
- * SetForegroundWindow(GameWnd) KULLANMA — oyunu overlay ustune iter, UWP restack yapamaz.
- */
+
 inline void ExpectionalRestoreForegroundToGame() noexcept
 {
 	if (!GameWnd || !IsWindow(GameWnd) || !MyWnd || !IsWindow(MyWnd))
@@ -359,7 +351,6 @@ inline void ExpectionalRestoreForegroundToGame() noexcept
 		(void)AttachThreadInput(our_tid, game_tid, FALSE);
 }
 
-/** Menü kapalıyken ImGui klavye kuyruğunu bosalt. */
 inline void ExpectionalClearImGuiInputForGameplay() noexcept
 {
 	if (Settings::bMenu)
@@ -373,10 +364,6 @@ inline void ExpectionalClearImGuiInputForGameplay() noexcept
 		ExpectionalRestoreForegroundToGame();
 }
 
-/**
- * Menü acikken WS_EX_TRANSPARENT kaldirilir; kapaliyken tiklar oyuna gecer.
- * eskisurum Expectional-master/Valorant/Overlay/render.hpp
- */
 inline void ExpectionalSyncOverlayForMenu(bool menuOpen)
 {
 	if (!MyWnd || !IsWindow(MyWnd))
@@ -416,12 +403,12 @@ inline void ExpectionalSyncOverlayForMenu(bool menuOpen)
 
 void DrawCornerBox(int x, int y, int w, int h, int borderPx, RGBA* color)
 {
-	DrawFilledRect(x + borderPx, y, w / 3, borderPx, color); //top 
-	DrawFilledRect(x + w - w / 3 + borderPx, y, w / 3, borderPx, color); //top 
-	DrawFilledRect(x, y, borderPx, h / 3, color); //left 
-	DrawFilledRect(x, y + h - h / 3 + borderPx * 2, borderPx, h / 3, color); //left 
-	DrawFilledRect(x + borderPx, y + h + borderPx, w / 3, borderPx, color); //bottom 
-	DrawFilledRect(x + w - w / 3 + borderPx, y + h + borderPx, w / 3, borderPx, color); //bottom 
-	DrawFilledRect(x + w + borderPx, y, borderPx, h / 3, color);//right 
-	DrawFilledRect(x + w + borderPx, y + h - h / 3 + borderPx * 2, borderPx, h / 3, color);//right 
+	DrawFilledRect(x + borderPx, y, w / 3, borderPx, color); 
+	DrawFilledRect(x + w - w / 3 + borderPx, y, w / 3, borderPx, color); 
+	DrawFilledRect(x, y, borderPx, h / 3, color); 
+	DrawFilledRect(x, y + h - h / 3 + borderPx * 2, borderPx, h / 3, color); 
+	DrawFilledRect(x + borderPx, y + h + borderPx, w / 3, borderPx, color); 
+	DrawFilledRect(x + w - w / 3 + borderPx, y + h + borderPx, w / 3, borderPx, color); 
+	DrawFilledRect(x + w + borderPx, y, borderPx, h / 3, color);
+	DrawFilledRect(x + w + borderPx, y + h - h / 3 + borderPx * 2, borderPx, h / 3, color);
 }

@@ -36,7 +36,6 @@ namespace ImGui
         return ItemHoverable(bb, id);
     }
 
-    // Handles cases where 4 arguments were passed (bb, id, NULL, NULL)
     static inline bool ItemHoverable(const ImRect& bb, ImGuiID id, void* p1, void* p2)
     {
         return ItemHoverable(bb, id);
@@ -57,23 +56,18 @@ namespace edited
 {
     void RenderTextColor(ImFont* font, const ImVec2& min, const ImVec2& max, ImU32 color, const char* text, const ImVec2& align);
 
-    // Shim to handle any number of extra arguments for RenderTextColor
     template<typename... Args>
     static inline void RenderTextColor(ImFont* font, const ImVec2& min, const ImVec2& max, ImU32 color, const char* text, const ImVec2& align, Args... args)
     {
         RenderTextColor(font, min, max, color, text, align);
     }
 
-    // Capture ItemHoverable calls inside edited namespace too
     template<typename... Args>
     static inline bool ItemHoverable(Args... args)
     {
         return ImGui::ItemHoverable(args...);
     }
     
-    // ColorEdit4 shim removed to avoid redefinition of default argument.
-    // Use the declaration from imgui_edited.hpp.
-
     const char* keys[] =
     {
         "-",
@@ -283,7 +277,6 @@ namespace edited
         if (!ImGui::ItemAdd(rect, id)) return false;
 
         char buf_display[64] = "None";
-
 
         bool value_changed = false;
         int k = *key;
@@ -527,9 +520,9 @@ namespace edited
 
         const float square_sz = 18.f;
         const ImVec2 pos = window->DC.CursorPos;
-        /* 0 = tam genislik etiket. >0: sagda SameLine widget (renk vb.) icin yer birak; ESP toggle + renk ayni satirda. */
+        
         const float reserve = inline_reserve_right_px > 0.f ? inline_reserve_right_px : 0.f;
-        /* Tablo hucrelerinde WorkRect zaten kolon icidir; WindowPadding tekrar dusmek etiketi gereksiz keser (ESP vb.). */
+        
         const float pad_trim = (g.CurrentTable != nullptr) ? 0.f : style.WindowPadding.x;
         const float label_area_right_cap = window->WorkRect.Max.x - pad_trim - reserve;
         const float natural_right = pos.x + square_sz + 10.f + label_size.x;
@@ -552,16 +545,13 @@ namespace edited
 
         state.background = ImLerp(state.background, *v ? c::accent : (ImVec4)ImColor(35, 35, 35, 255), g.IO.DeltaTime * 12.f);
 
-        // Draw checkbox square
         ImRect check_bb(pos, pos + ImVec2(square_sz, square_sz));
         GetWindowDrawList()->AddRectFilled(check_bb.Min, check_bb.Max, GetColorU32(state.background), 2.f);
 
-        // Outline for unselected
         if (!*v) {
             GetWindowDrawList()->AddRect(check_bb.Min, check_bb.Max, ImColor(50, 50, 50, 255), 2.f, 0, 1.0f);
         }
 
-        // Draw label (same font as measurement — avoids clipped endings vs bold width)
         RenderTextColor((ImFont*)lbl_font, pos + ImVec2(square_sz + 10.0f, 0.0f), ImVec2(clip_right, pos.y + square_sz), GetColorU32(c::elements::text_active), label, ImVec2(0.0f, 0.5f));
 
         if (hovered && description && description[0] != '\0') {
@@ -946,19 +936,17 @@ namespace edited
         if ((flags & ImGuiSelectableFlags_SelectOnNav) && g.NavJustMovedToId != 0 && g.NavJustMovedToFocusScopeId == g.CurrentFocusScopeId)
             if (g.NavJustMovedToId == id)  selected = pressed = true;
 
-        // Update NavId when clicking or when Hovering (this doesn't happen on most widgets), so navigation can be resumed with gamepad/keyboard
         if (pressed || (hovered && (flags & ImGuiSelectableFlags_SetNavIdOnHover)))
         {
             if (!g.NavDisableMouseHover && g.NavWindow == window && g.NavLayer == window->DC.NavLayerCurrent)
             {
-                SetNavID(id, window->DC.NavLayerCurrent, g.CurrentFocusScopeId, WindowRectAbsToRel(window, bb)); // (bb == NavRect)
+                SetNavID(id, window->DC.NavLayerCurrent, g.CurrentFocusScopeId, WindowRectAbsToRel(window, bb)); 
                 g.NavDisableHighlight = true;
             }
         }
         if (pressed) MarkItemEdited(id);
 
         if (selected != was_selected)  g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
-
 
         if (g.NavId == id) RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
 
@@ -998,7 +986,7 @@ namespace edited
         while ((fmt = strchr(fmt, '%')) != NULL)
         {
             fmt++;
-            if (fmt[0] == '%') { fmt++; continue; } // Ignore "%%"
+            if (fmt[0] == '%') { fmt++; continue; } 
             while (*fmt >= '0' && *fmt <= '9')
                 fmt++;
             if (*fmt == '.')
@@ -1412,8 +1400,6 @@ namespace edited
         return pressed;
     }
 
-
-
     struct edit_state
     {
         ImVec4 text;
@@ -1626,7 +1612,7 @@ namespace edited
                         i[3] = 0xFF;
                         int r;
                         if (alpha)
-                            r = sscanf_s(p, "%02X%02X%02X%02X", (unsigned int*)&i[0], (unsigned int*)&i[1], (unsigned int*)&i[2], (unsigned int*)&i[3]); // Treat at unsigned (%X is unsigned)
+                            r = sscanf_s(p, "%02X%02X%02X%02X", (unsigned int*)&i[0], (unsigned int*)&i[1], (unsigned int*)&i[2], (unsigned int*)&i[3]); 
                         else
                             r = sscanf_s(p, "%02X%02X%02X", (unsigned int*)&i[0], (unsigned int*)&i[1], (unsigned int*)&i[2]);
                         IM_UNUSED(r);
@@ -1915,7 +1901,6 @@ namespace edited
 
         return value_changed;
     }
-
 
     bool ColorButton(const char* desc_id, const ImVec4& col, ImGuiColorEditFlags flags, const ImVec2& size_arg)
     {

@@ -179,7 +179,7 @@ static WeaponRuntime::WeaponCategory CategoryFromKey(const std::string& key) {
 
 static void WriteBoolLine(std::ostream& o, const char* k, bool v) { o << k << '=' << (v ? 1 : 0) << '\n'; }
 
-} // namespace
+} 
 
 namespace WeaponRuntime {
 
@@ -543,4 +543,4 @@ void LoadWeaponProfileLine(const std::string& key, const std::string& val) {
 	g_profiles[wname] = s;
 }
 
-} // namespace WeaponRuntime
+} 

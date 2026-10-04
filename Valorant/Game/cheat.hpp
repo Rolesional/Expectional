@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include "..\Overlay\render.hpp" //fixed blaaah!
+#include "..\Overlay\render.hpp" 
 #include "entity_handle.hpp"
 #include "hit_feedback.hpp"
 #include "..\Overlay\menu.hpp"
@@ -28,7 +28,7 @@
 using namespace ColorStructs;
 
 namespace {
-/** ananbaban Cheats.cpp + Render.h: dikey bar (4px, Rect.x-6 / -10). */
+
 inline void ExpectionalAnanbabanVBar(int x, int y, int w, int h, float proportion, ImU32 fillCol) {
 	const float p = std::clamp(proportion, 0.f, 1.f);
 	ImDrawList* dl = ImGui::GetBackgroundDrawList();
@@ -56,7 +56,7 @@ public:
 	Cham() = default;
 	constexpr Cham(uint8_t new_red, uint8_t new_green, uint8_t new_blue, uint8_t new_alpha) : red_(new_red), green_(new_green), blue_(new_blue), alpha_(new_alpha)
 	{
-		//empty
+		
 	}
 };
 
@@ -140,7 +140,6 @@ inline std::string ExpectionalReadWeaponName(uintptr_t pawn) {
 	return nm ? std::string(nm) : std::string("unknown");
 }
 
-/** Rank Revealer listesi: canli + olu (ESP PlayerList'ten bagimsiz). */
 inline CS2Entity ExpectionalBuildRankRevealEntry(uintptr_t player, uintptr_t pawn, int entity_i, std::uint32_t playerpawn_full)
 {
 	CS2Entity E{};
@@ -185,7 +184,7 @@ inline CS2Entity ExpectionalBuildRankRevealEntry(uintptr_t player, uintptr_t paw
 
 auto cacheGame() -> void
 {
-	/** ~60 Hz: 5 ms ile driver mutex'i overlay'i biciyordu; ~16 ms tatlimsi nokta (esp tahmin zaten ileri). */
+	
 	while (true)
 	{
 		std::vector<CS2Entity> temp;
@@ -235,8 +234,6 @@ auto cacheGame() -> void
 			const uintptr_t player = ex_entity::ResolveEntityFromListSlot(i);
 			if (!player)
 				continue;
-
-			/* enemiesOnly: ESP dongusunde filtrelenir; PlayerList takimi da tasir (Team Check acikken radar bos kalmasin). */
 
 			const std::uint32_t playerpawn = g_GameMem.readv<std::uint32_t>(player + offsets::dwPlayerPawn);
 			uintptr_t pCSPlayerPawn = ex_entity::ResolveHandle(playerpawn);
@@ -340,18 +337,13 @@ auto cacheGame() -> void
 			temp.push_back(Entities);
 		}
 
-		/** Bombaci: envanter + son pickup tarama cache (tam liste IOCTL overlay'de degil). */
 		if (Settings::Visuals::bombCarrierEsp) {
 			for (auto& ent : temp)
 				if (!ent.has_c4)
 					ent.has_c4 = ex_esp::PawnInventoryContainsWeaponDef(ent.Actor, 49);
 			ex_esp::ApplyCachedC4CarrierFlags(temp);
 		}
-		/**
-		 * ESP Other: IOCTL cacheGame'de. BATCH IOCTL + classify cache ile her scan
-		 * ~30x daha ucuz (eskiden 2048 IOCTL → ~10-20 IOCTL steady state).
-		 * Bu yuzden intervaller daha kisa olabilir — taze veri, az CPU.
-		 */
+		
 		{
 			const DWORD now_w = GetTickCount();
 			const int combo = ex_esp::ConcurrentHeavyWorldKernelScanFeatures();
@@ -362,7 +354,7 @@ auto cacheGame() -> void
 			const int wq = std::clamp(Settings::misc::workerQuality, 0, 2);
 
 			if (Settings::Visuals::bombWorldEsp || Settings::Visuals::bombCarrierEsp) {
-				/* Bomb: cok hafif cache ile — Eco bile <1ms. */
+				
 				DWORD iv = (wq == 0) ? 70u : (wq == 2) ? 22u : 38u;
 				if (combo >= 3) iv = iv * 6u / 5u;
 				if (now_w - s_last_bomb_ms >= iv) {
@@ -371,7 +363,7 @@ auto cacheGame() -> void
 				}
 			}
 			if (Settings::Visuals::droppedWeaponEsp) {
-				/* Dropped weapon: cache sayesinde steady-state cok ucuz; biraz daha az seyrek. */
+				
 				DWORD iv = (wq == 0) ? 140u : (wq == 2) ? 55u : 90u;
 				if (combo >= 3) iv = iv * 5u / 4u;
 				if (now_w - s_last_drop_ms >= iv) {
@@ -381,7 +373,7 @@ auto cacheGame() -> void
 				}
 			}
 			if (ex_esp::WorldGrenadeEspActive()) {
-				/* Dunya nade: en kritik (havadan duvara carpan smoke/molly hizla degisir). */
+				
 				DWORD iv = (wq == 0) ? 50u : (wq == 2) ? 16u : 28u;
 				if (combo >= 3) iv = iv * 5u / 4u;
 				if (now_w - s_last_nade_ms >= iv) {
@@ -401,7 +393,6 @@ auto cacheGame() -> void
 	}
 }
 
-/** ananbaban sira: WM_KEYUP -> WM_KEYDOWN. PostMessage: SendMessage gibi oyunu bloklamaz (bhop thread hizli kalir). */
 inline void ExpectionalCs2BhopJump(bool wantDown, bool reedge) noexcept
 {
 	static bool s_down = false;
@@ -425,10 +416,6 @@ inline void ExpectionalCs2BhopJump(bool wantDown, bool reedge) noexcept
 	s_down = true;
 }
 
-/**
- * Havadan yere inis aninda bir kez (edge) — gecikme yok, zincirde "sifira sifir" his.
- * misc.bhop_delay_ms > 0 ise ek ms kisit (config; varsayilan 0).
- */
 inline void ExpectionalBhopTick()
 {
 	if (!Settings::misc::bhop || !global_pawn || !offsets::m_fFlags || !offsets::m_iTeamNum) {
@@ -448,7 +435,7 @@ inline void ExpectionalBhopTick()
 	const bool spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x8000) != 0;
 	const uint32_t fl = g_GameMem.readv<uint32_t>(global_pawn + static_cast<uintptr_t>(offsets::m_fFlags));
 	const bool onGround = (fl & 1u) != 0;
-	/** C_BaseEntity::m_MoveType — 9 = merdiven. Ziplama merdivenden dusurur. */
+	
 	constexpr std::ptrdiff_t kMoveTypeOff = 0x525;
 	const uint8_t moveType = g_GameMem.readv<uint8_t>(global_pawn + kMoveTypeOff);
 	float velZ = 0.f;
@@ -484,7 +471,6 @@ inline void ExpectionalBhopTick()
 	const bool landedEdge = onGround && !s_prevOnGround;
 	s_prevOnGround = onGround;
 
-	/** Basamak: yer bayragi birkac tick yanip soner, dikey hiz yukari. Gercek hop daha uzun havada kalir. */
 	bool stairStep = false;
 	if (landedEdge) {
 		const ULONGLONG airMs = (s_airSince != 0) ? (now - s_airSince) : 0;
@@ -515,7 +501,6 @@ inline void ExpectionalBhopTick()
 	ExpectionalCs2BhopJump(true, true);
 }
 
-/** espLoop: oyuncu/combat + bomb/silah dunya ESP. Yer nade/hull/lineup ayri overlay'de. */
 inline bool ExpectionalShouldRunEspLoop() noexcept
 {
 	if (!client || !global_pawn)
@@ -527,7 +512,6 @@ inline bool ExpectionalShouldRunEspLoop() noexcept
 	return false;
 }
 
-/** render() icinden — espLoop / VM / BVH parse disinda. vm_pre null ise burada okunur. */
 void ExpectionalGrenadeOverlayFrame(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 {
 	if (!global_pawn || !client || !offsets::dwViewMatrix)
@@ -538,7 +522,7 @@ void ExpectionalGrenadeOverlayFrame(const UE4Structs::view_matrix_t* vm_pre = nu
 	static Vector3 s_cachedEye{};
 	Vector3 localEyeWorld = s_cachedEye;
 	if (Settings::Visuals::grenadeLineups) {
-		/** CView birincil; basarisizsa kafa fallback (trajectory ayaktan baslamasin). */
+		
 		localEyeWorld = Vector3{};
 		if (offsets::m_pGameSceneNode) {
 			const uintptr_t lgs =
@@ -566,7 +550,6 @@ void ExpectionalGrenadeOverlayFrame(const UE4Structs::view_matrix_t* vm_pre = nu
 		ExpectionalGrenadeLineupRender(vm, global_pawn, localEyeWorld);
 }
 
-/** espLoop'tan bagimsiz — bomb/dusmus silah yalnizca cache cizimi. */
 inline void ExpectionalDrawWorldPickupOverlayFrame(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 {
 	if (!client || !offsets::dwViewMatrix)
@@ -582,7 +565,6 @@ inline void ExpectionalDrawWorldPickupOverlayFrame(const UE4Structs::view_matrix
 		ex_esp::DrawDroppedWeaponsWorldEsp(vm);
 }
 
-/** espLoop'tan bagimsiz — molotov hull / world nade her kare (VM guncel). */
 inline void ExpectionalDrawWorldGrenadeOverlayFrame(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 {
 	if (!client || !offsets::dwViewMatrix)
@@ -664,9 +646,8 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			const float pixelsPerDegreeY = (ScreenCenterY * 2.f) / fovY;
 			const float pixelsPerDegreeX = (ScreenCenterX * 2.f) / fovX;
 
-			// Recoil pitch < 0 is UP. Circle moves UP (-Y).
 			aimCy += dbPunchX * dbScale * pixelsPerDegreeY;
-			// Recoil yaw > 0 is LEFT. Circle moves LEFT (-X).
+			
 			aimCx -= dbPunchY * dbScale * pixelsPerDegreeX;
 		}
 
@@ -677,7 +658,6 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 				ImVec2(aimCx, aimCy), combat.aim_fov, fovRing, budget.fov_circle_segments);
 		}
 
-		// player info reading :
 		std::vector<CS2Entity> snapshot;
 		{
 			std::lock_guard<std::mutex> lk(g_PlayerListMutex);
@@ -728,7 +708,7 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 		ex_autowall::WeaponData aw_wd{};
 		if (global_pawn && (combat.aim_autowall || combat.penetration_crosshair))
 			aw_wd = ex_autowall::ReadWeaponData(global_pawn);
-		/** BVH yokken aim visible fallback: oyun maskesi (BVH varken mask okunmaz — gecikmeli spotted kullanilmaz). */
+		
 		const bool aimSpotReadsFrame =
 		    combat.aim_visible_only && global_pawn && offsets::m_entitySpottedState != 0 && !bvhLosReadyFrame;
 		const uint64_t aimLocalSpotMask = aimSpotReadsFrame ? ReadSpottedMask(global_pawn) : 0ull;
@@ -737,7 +717,7 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 		if (budget.need_player_loop)
 		for (const CS2Entity& CachePlayers : snapshot)
 		{
-			/** Stale pointer fix: controller'dan pawn her kare (git-gel onleme). */
+			
 			uintptr_t pawnAddr = CachePlayers.Actor;
 			if (CachePlayers.Controller && offsets::dwPlayerPawn) {
 				const std::uint32_t hPawn = g_GameMem.readv<std::uint32_t>(
@@ -777,16 +757,14 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			else if (offsets::m_vecOrigin)
 				origin = g_GameMem.readv<Vector3>(pawnAddr + static_cast<uintptr_t>(offsets::m_vecOrigin));
 
-			/** Garbage entity koruma: origin ~0 ve >1km uzak ise (dormant/dead/ragdoll) cizim yapma. */
 			if (origin.length2d() < 4.f && std::fabs(origin.z) < 4.f)
 				continue;
 
-			/** Oyuncuyu hizina gore ileri tasi — kosan/strafe yapan dusman dururken kutu yerinde, hareket halinde "simdiki" gorunur. */
 			Vector3 entVel{};
 			if (playerPredictSec > 0.f && offsets::m_vecAbsVelocity) {
 				entVel = g_GameMem.readv<Vector3>(pawnAddr + static_cast<uintptr_t>(offsets::m_vecAbsVelocity));
 				const float vlen2 = entVel.x * entVel.x + entVel.y * entVel.y + entVel.z * entVel.z;
-				/** 1024 u/s ^2 ustu (teleport/ragdoll) -> tahmin yapma. */
+				
 				if (vlen2 < 1024.f * 1024.f) {
 					origin.x += entVel.x * playerPredictSec;
 					origin.y += entVel.y * playerPredictSec;
@@ -806,8 +784,6 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			if (gamescene >= 0x10000ull && offsets::m_boneArrayFromScene)
 				bonearray = g_GameMem.readv<uint64_t>(gamescene + offsets::m_boneArrayFromScene);
 
-			/** Reference (um & onceki Expectional) ile birebir: per-bone IOCTL — bulk read race
-			 *  window'unda yari/garbage kemikler veriyordu. Filtre yok, sadece bonearray pointer kontrolu. */
 			const bool boneBufOk = (bonearray >= 0x10000ull);
 			Vector3 boneWs[24]{};
 			uint32_t boneGot = 0;
@@ -868,7 +844,7 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			auto considerAimBone = [&](const Vector3& aimWorld, int bone_idx) {
 				Vector3 aimWorldUse = aimWorld;
 				Vector3 aimScreen;
-				/** Aimbot ham (extrapolasyonsuz) matris kullanir — yoksa hedef "olacagi" yere kilitlenir, asilir. */
+				
 				if (!w2s(aimWorldUse, aimScreen, vmNow))
 					aimScreen = aimWorldUse.world_to_screen(vmNow);
 				bool aimVisOk = true;
@@ -955,10 +931,10 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			bool espLosClear = false;
 			if (budget.need_bvh_esp_los && global_pawn && bvhLosReadyFrame)
 				espLosClear = ExpectionalBvhVisibleSmoothed(pawnAddr, localEyeWorld, headWorld);
-			/** enablePlayerEsp=false: cizim tamamen engellenir, ama aimbot/combat kodu yukarida calisiyordu. */
+			
 			const bool allowDraw = Settings::Visuals::enablePlayerEsp &&
 			    (!wantHideOccluded || (bvhLosReadyFrame && espLosClear)) && !blindHideAll;
-			/** Bombaci etiketi ananbaban gibi envanter tabanli; visible-only kapali sandik box ile birlikte kaybolmasin. */
+			
 			if (Settings::Visuals::enablePlayerEsp && Settings::Visuals::bombCarrierEsp && CachePlayers.has_c4 && !blindHideAll) {
 				ImDrawList* bgC4 = ImGui::GetBackgroundDrawList();
 				float labelTopC4 = ry - 2.f;
@@ -980,9 +956,9 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 
 			if (allowDraw) {
 				ImDrawList* bg = ImGui::GetBackgroundDrawList();
-				/** LOS renkleri: BVH hazirsa visible/hidden; degilse tek hidden paleti. */
+				
 				const bool useLosColors = budget.need_bvh_esp_los && global_pawn && bvhLosReadyFrame;
-				/** Vis/hidden palet secici — tum LOS-aware ozellikler ayni tertibi kullansin. */
+				
 				const auto pickRgb3 = [&](const float* hid, const float* vis) -> ImVec4 {
 					if (useLosColors && espLosClear)
 						return ImVec4(vis[0], vis[1], vis[2], 1.f);
@@ -1144,8 +1120,7 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 						const cs2_bones::BoneLink& L = cs2_bones::kSkeleton[li];
 						const Vector3 wa = readBoneCached(L.a);
 						const Vector3 wb = readBoneCached(L.b);
-						/** Sanity (origin'e 256u uzak veya 0): readBone sifir donduruyor — haritanin
-						 *  obur ucundaki (0,0,0) noktasi ile linki cizmemek icin atla. */
+						
 						if (isZeroV(wa) || isZeroV(wb))
 							continue;
 						Vector3 sa, sb;
@@ -1215,7 +1190,7 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			s_stickyAimPawn = bestAimPawn;
 			s_stickyAimLost = 0;
 		} else if (sprayAimLock && s_stickyAimPawn) {
-			/** Validate sticky pawn is still alive — prevents RCS residual from sliding to invisible targets. */
+			
 			const int stickyHp = g_GameMem.readv<int>(s_stickyAimPawn + offsets::m_iHealth);
 			if (stickyHp <= 0) {
 				s_stickyAimPawn = 0;
@@ -1245,7 +1220,7 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 			s_rcsAimGraceMiss = (std::min)(s_rcsAimGraceMiss + 1, 1000);
 		else
 			s_rcsAimGraceMiss = 0;
-		/** Dusman olunce merge kapanir. Grace RCS'i tekrar acarsa biriken punch'i asagi basar. */
+		
 		if (!aim_has_target && combat.aimbot && aimKeyHeld && !combat.rcs_standalone)
 			s_rcsAimGraceMiss = kRcsAimGraceFrames;
 		const bool aim_rcs_lane = combat.aimbot && aimKeyHeld &&
@@ -1255,7 +1230,6 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 		const bool ananbaban_rcs_merge = spray_rcs_coop && combat.aimbot && !combat.rcs_standalone &&
 			aimKeyHeld && aim_has_target;
 
-		/** When aim_visible_only is on and target is lost (not visible), stop RCS to prevent wall drift. */
 		const bool rcs_vis_gate = combat.aim_visible_only && !aim_has_target && !combat.rcs_standalone;
 
 		if (combat.penetration_crosshair && global_pawn && aw_wd.valid && bvhLosReadyFrame && offsets::m_angEyeAngles) {
@@ -1336,4 +1310,4 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 	}
 	EX_VL_PROTECT_END;
 }
-
+

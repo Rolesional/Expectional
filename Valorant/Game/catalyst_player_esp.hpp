@@ -1,8 +1,5 @@
 #pragma once
-/**
- * Catalyst player.cpp / bounds.cpp ile ayni mantik: kemik WS projeksiyonundan 2D min/max,
- * genisletilmis ornek noktalar; kutu dolgusu + outline; sol health / alt ammo cubugu.
- */
+
 #include "structs.hpp"
 #include "globals.hpp"
 #include "weapon_icon_glyphs.hpp"
@@ -36,7 +33,6 @@ inline bool ProjectionOk(const UE4Structs::Vector3& sp) {
 	return sp.z >= 0.01f;
 }
 
-/** bounds.cpp: tum CS2 iskelet kemikleri + 9 genisletilmis nokta. */
 template<typename ReadBoneFn>
 inline ScreenBounds ComputeScreenBounds(const ReadBoneFn& readBone, const UE4Structs::view_matrix_t& vm) {
 	static constexpr int kBoneIds[] = {
@@ -101,7 +97,6 @@ inline void AddRectCornered(ImDrawList* dl, float x, float y, float w, float h, 
 	dl->AddLine(ImVec2(x, y + h), ImVec2(x, y + h - c), col, thick);
 }
 
-/** player.cpp add_box — filledGradient menu bayragi iki renkli ESP dolgu ile birlestirilir. */
 inline void DrawCatalystBox(ImDrawList* dl, float x, float y, float w, float h, ImU32 color,
 	bool wantFill, bool outline, int boxMode) {
 	const ImU32 black180 = IM_COL32(0, 0, 0, 180);
@@ -270,7 +265,6 @@ inline void DrawAmmoBarBottom(ImDrawList* dl, float boundsMinX, float boundsMaxY
 	}
 }
 
-/** Oyuncu ESP: yakin ~15px, kutu daralinca 7px'e iner. */
 inline float WeaponIconPixelHeight(float boxW) {
 	float ih = 15.f;
 	if (boxW > 1.f && boxW < 52.f)
@@ -282,7 +276,6 @@ inline float WeaponIconPixelHeight(float boxW) {
 	return ih;
 }
 
-/** Dusmus silah: yakinda 16px, cok uzakta en fazla 13px. */
 inline float DroppedWeaponIconPixelHeight(float depth) {
 	float ih = 16.f;
 	if (depth > 500.f)
@@ -294,7 +287,6 @@ inline float DroppedWeaponIconPixelHeight(float depth) {
 	return ih;
 }
 
-/** Ikon ve metin ayri acilir; ikisi de aciksa ust uste (ikon ustte). */
 inline void DrawWeaponGlyphAndOrText(ImDrawList* dl, float boundsMinX, float boundsMaxY, float boundsW,
 	const char* weaponName, ImU32 col, DrawOffsets& off, bool wantIcon, bool wantText) {
 	if ((!wantIcon && !wantText) || !weaponName || !weaponName[0])
@@ -353,7 +345,6 @@ inline void DrawWeaponGlyphAndOrText(ImDrawList* dl, float boundsMinX, float bou
 	}
 }
 
-/** Yer silahi etiketi (ekran tabani ~ ayak); yalniz metin / ikon — ayarlardan. */
 inline void DrawDroppedWeaponWorldLabel(ImDrawList* dl, float sx, float sy, const char* weaponName, ImU32 col, float depth = 0.f) {
 	if (!weaponName || !weaponName[0])
 		return;
@@ -402,4 +393,4 @@ inline void DrawDroppedWeaponWorldLabel(ImDrawList* dl, float sx, float sy, cons
 		ex_esp::StrokeTextBg(dl, shown, sx, y, col);
 }
 
-} // namespace catalyst_esp
+} 

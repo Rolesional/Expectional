@@ -1,4 +1,4 @@
-/** Tek TU: MenuConfig stub'daki inline degiskenler bazi link senaryolarinda iki kopya uretiyordu. */
+
 #include "shade_menu_config_stub.hpp"
 
 namespace MenuConfig

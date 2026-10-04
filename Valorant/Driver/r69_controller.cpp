@@ -433,7 +433,7 @@ static std::uint64_t WalkLdrModuleList(
 			if (!sz)
 				sz = ReadPeSizeOfImage(base);
 			const bool hdr = ProbeImageHeaderLocal(base);
-			/** Baslik sayfasi kapali olabilir; LDR SizeOfImage ile en buyugu tut. */
+			
 			const bool better = !named_match || (hdr && !named_hdr) || (hdr == named_hdr && sz > named_size);
 			if (better) {
 				named_match = base;
@@ -528,7 +528,7 @@ static std::vector<std::uint32_t> CollectProcessIdsByImageName(const wchar_t* im
 	return pids;
 }
 
-} // namespace
+} 
 
 std::uint32_t find_process_id_by_image_name_light(const wchar_t* image_name) {
 	if (!image_name || !image_name[0])
@@ -565,7 +565,7 @@ bool probe_image_header(std::uint64_t image_base) {
 	if (!g_ready || !image_base)
 		return false;
 	std::uint16_t magic = 0;
-	return ReadVa(image_base, magic) && magic == 0x5A4D; // 'MZ'
+	return ReadVa(image_base, magic) && magic == 0x5A4D; 
 }
 
 module_resolve_result resolve_module_base(const wchar_t* module_name) {
@@ -978,4 +978,4 @@ const query_process_data_packet& attached_process() {
 	return g_pd;
 }
 
-} // namespace expectional_r69
+} 

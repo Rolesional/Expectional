@@ -140,7 +140,6 @@ inline void Tick(uintptr_t local_pawn, uintptr_t local_controller) noexcept {
 	marker.Update();
 }
 
-/** CGlobalVars: realtime + framecount — yaklasik oyun client FPS. */
 inline int SampleGameFpsSmoothed() noexcept
 {
 	static float smooth = 0.f;
@@ -264,4 +263,4 @@ inline void DrawWatermarkWindow() noexcept {
 	ImGui::End();
 }
 
-} // namespace ex_hit_feedback
+} 

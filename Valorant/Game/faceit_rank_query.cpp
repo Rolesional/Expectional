@@ -39,7 +39,6 @@
 
 namespace {
 
-/** FaceIT Data API v4 — uygulama icinde sabit (manuel giris yok). */
 static constexpr const char kExpectionalFaceitBearer[] = "7ed60fec-6e2d-4f36-b946-0f4ca3297e25";
 
 struct FaceitRow {
@@ -54,7 +53,7 @@ std::mutex g_faceit_mu;
 std::unordered_map<std::uint64_t, FaceitRow> g_faceit_cache;
 std::deque<std::uint64_t> g_faceit_queue;
 std::unordered_set<std::uint64_t> g_faceit_queued_set;
-/** Worker FaceitFetchOne icindeyken ayni steam64 tekrar kuyruklanmasin. */
+
 std::unordered_set<std::uint64_t> g_faceit_inflight;
 
 struct SteamInvRow {
@@ -62,7 +61,7 @@ struct SteamInvRow {
 	std::string status;
 	bool truncated = false;
 	uint64_t fetched_tick_ms = 0;
-	/** 0 = varsayilan uzun TTL; >0 ise bu kadar ms sonra yeniden siraya al. */
+	
 	uint32_t refetch_after_ms = 0;
 };
 
@@ -70,11 +69,11 @@ std::mutex g_steam_inv_mu;
 std::unordered_map<std::uint64_t, SteamInvRow> g_steam_inv_cache;
 std::deque<std::uint64_t> g_steam_inv_queue;
 std::unordered_set<std::uint64_t> g_steam_inv_queued_set;
-/** Worker SteamInvFetchOne icindeyken ayni steam64 tekrar kuyruklanmasin (NotifyFrame stale spam). */
+
 std::unordered_set<std::uint64_t> g_steam_inv_inflight;
 
 std::mutex g_steam_price_mu;
-/** market_hash_name -> USD cents; -1 = bilinmiyor (henuz), -2 = market cevabi yok. */
+
 std::unordered_map<std::string, int64_t> g_steam_price_cents;
 
 std::atomic<bool> g_worker_stop{ false };
@@ -99,7 +98,6 @@ static int JsonIntAfter(const std::string& j, size_t from)
 	return static_cast<int>(v);
 }
 
-/** JSON icinde ilk `"key":` sayisini okur; `:null` ise false. */
 static bool JsonExtractIntKey(const std::string& j, const char* key, int& out)
 {
 	const std::string needle = std::string("\"") + key + "\":";
@@ -312,7 +310,6 @@ static bool SteamCommunityGet(const std::wstring& pathW, std::string& bodyOut, D
 	return ok;
 }
 
-/** Steam envanter: curl ile dogrulanan basliklar (Referer + X-Requested-With, gzip acik). */
 static bool SteamInventoryGetOnHost(std::uint64_t steam64, const wchar_t* host, const std::wstring& pathW,
     std::string& bodyOut, DWORD& statusOut, std::string& errOut)
 {
@@ -349,7 +346,6 @@ static bool SteamInventoryGetReliableOnHost(std::uint64_t steam64, const wchar_t
 	return true;
 }
 
-/** 429 icin bekleme + tekrar; tek seferlik patlamalari azaltir. */
 static bool SteamCommunityGetReliable(const std::wstring& pathW, std::string& bodyOut, DWORD& statusOut, std::string& errOut)
 {
 	const int kMax = 3;
@@ -498,8 +494,6 @@ static void ForEachTopLevelJsonObject(const std::string& inner, const std::funct
 	}
 }
 
-/** csgobackpack.net /api/GetInventoryValue: tek istekle CS2 envanter toplam USD.
- *  Donus: >=0 cents (basari) / -1 ag-hata-veya-format / -2 success:false (gizli/bos) */
 static int64_t CsgoBackpackInvValueCents(std::uint64_t steam64, DWORD& httpOut, std::string& errOut)
 {
 	httpOut = 0;
@@ -592,7 +586,7 @@ static void SteamInvFetchOne(std::uint64_t steam64)
 		return true;
 	};
 	bool inventoryReady = false;
-	/** Curl ile dogrulanan sira: once 75, sonra 2000; steamcommunity + www yedek. */
+	
 	if (tryInv(L"steamcommunity.com", path75, true))
 		inventoryReady = true;
 	else if (tryInv(L"steamcommunity.com", path2000, false))
@@ -914,7 +908,6 @@ static void SteamWorkerLoop()
 	}
 }
 
-/** Premier modu sinyali: tip Premier veya ranking 1..18 araliginin disinda (sayisal elo). */
 static bool RankRevealUsesPremierRating(int rankType, int ranking) noexcept
 {
 	if (expectional::cs2::RankTypeIsPremier(rankType))
@@ -924,13 +917,11 @@ static bool RankRevealUsesPremierRating(int rankType, int ranking) noexcept
 	return false;
 }
 
-/** Ranking dogrudan kucuk legacy/wingman rank index'i ise (1..18) text label gosterilir. */
 static bool RankingIsLegacyIndex(int ranking) noexcept
 {
 	return ranking >= 1 && ranking <= 18;
 }
 
-/** Premier tahmin hucreleri: oyun genelde mutlak rating; mevcut - tahmin farki olarak %+d. */
 static void RankRevealDrawPremierPredDelta(const ImVec4& col, int curRanking, int predAbs) noexcept
 {
 	if (!predAbs) {
@@ -946,7 +937,6 @@ static void RankRevealDrawPremierPredDelta(const ImVec4& col, int curRanking, in
 	ImGui::TextColored(col, "%+d", d);
 }
 
-/** Rank Revealer: Premier sayisal rating renk bantlari. */
 static ImVec4 RankRevealPremierRatingColor(int rating) noexcept
 {
 	if (rating < 5000)
@@ -982,7 +972,7 @@ static const char* Cs2RankLabelShort(int ranking, int rankType)
 	return "-";
 }
 
-} // namespace
+} 
 
 void ExpectionalFaceitWorkerEnsureStarted()
 {
@@ -1054,7 +1044,6 @@ void ExpectionalFaceitWorkerNotifyFrame()
 	}
 }
 
-/** Faceit LVL metni: 1-2 beyaz, 3-5 yesil, 6-7 turuncu, 8-10 kirmizi. */
 static ImVec4 RankRevealFaceitLevelColor(int skillLevel) noexcept
 {
 	if (skillLevel >= 1 && skillLevel <= 2)

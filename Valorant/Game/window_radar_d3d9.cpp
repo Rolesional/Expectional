@@ -294,7 +294,7 @@ static ImVec2 MapTexRotScreenPt(const ImVec2& p, const ImVec2& ctr, float yawDeg
 	return ImVec2(ctr.x + rx * (mapW * 0.5f), ctr.y + ry * (mapH * 0.5f));
 }
 
-} // namespace
+} 
 
 void WindowRadarD3d9_Tick(const char* map_id_utf8, const char* world_name_utf8) {
 	if (!map_id_utf8 || !map_id_utf8[0] || !world_name_utf8 || !world_name_utf8[0])

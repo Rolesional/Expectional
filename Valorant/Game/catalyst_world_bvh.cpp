@@ -30,12 +30,10 @@ std::atomic<int>           g_dbg_body_count{ 0 };
 std::atomic<int>           g_dbg_last_extracted{ 0 };
 std::atomic<std::uint32_t> g_dbg_world_vtable_found{ 0 };
 
-/** Basarili offset kombinasyonu (parse'da da kullanilir). */
 static int g_world_inner_off = 0x30;
 static int g_world_arr_off   = 0x110;
 static int g_world_cnt_off   = 0x268;
 
-/** Basarili mov [rip] offseti (modul tabanina gore); parse tekrarinda agir taramayi atlar. */
 static std::uintptr_t g_bvh_movrip_rva_cache = 0;
 
 static void BvhRememberMovRip( std::uintptr_t cli, std::uintptr_t instr )
@@ -44,11 +42,6 @@ static void BvhRememberMovRip( std::uintptr_t cli, std::uintptr_t instr )
 		g_bvh_movrip_rva_cache = instr - cli;
 }
 
-/**
- * Pointer'in modul araligi icinde olup olmadigini kontrol et.
- * Modul araligi: [base, base + image_size). Bu aralikta olanlar heap degil,
- * PE section — yanlis pozitif cikanir.
- */
 static bool BvhIsInModuleRange( std::uintptr_t ptr, std::uintptr_t mod_base )
 {
 	if ( !ptr || !mod_base || ptr < mod_base )
@@ -57,13 +50,11 @@ static bool BvhIsInModuleRange( std::uintptr_t ptr, std::uintptr_t mod_base )
 	return sz > 0 && ptr < mod_base + sz;
 }
 
-/** Offset dogrulama kombinasyonlari (Source2 surumler arasi kayma payiyla). */
 static bool BvhLooksLikeWorld( std::uintptr_t world )
 {
 	if ( !world || world < 0x10000 || world > 0x00007FFFFFFFFFFFULL )
 		return false;
 
-	/** Modul araligi icindeki adresler heap nesne olamaz — sahte pozitif. */
 	{
 		const std::uintptr_t vph = cat_mem::vphysics_module( );
 		const std::uintptr_t cli = cat_mem::client_module( );
@@ -71,10 +62,6 @@ static bool BvhLooksLikeWorld( std::uintptr_t world )
 			return false;
 	}
 
-	/**
-	 * inner_world hem baska bir modul araligi OLMAMALI,
-	 * hem de world ile ayni pointer OLMAMALI (kendine referans).
-	 */
 	static constexpr int k_inner_offs[] = { 0x28, 0x30, 0x38, 0x40, 0x20, 0x48, 0x50, 0x60 };
 	static constexpr int k_arr_offs[]   = { 0x100, 0x108, 0x110, 0x118, 0x120, 0xF8, 0x128, 0x130 };
 	static constexpr int k_cnt_offs[]   = { 0x260, 0x268, 0x270, 0x258, 0x278, 0x280, 0x250, 0x248 };
@@ -102,7 +89,7 @@ static bool BvhLooksLikeWorld( std::uintptr_t world )
 			for ( int co : k_cnt_offs )
 			{
 				const std::int32_t bc = cat_mem::readv<std::int32_t>( bodies + co );
-				/** Makul ucgen/body sayisi: CS2 haritasinda 50–200k arasi beklenir. */
+				
 				if ( bc > 50 && bc < 200000 )
 				{
 					g_world_inner_off = io;
@@ -116,7 +103,6 @@ static bool BvhLooksLikeWorld( std::uintptr_t world )
 	return false;
 }
 
-/** mov reg,[rip+disp32]: Catalyst bazen glob -> world tek okuma, bazen cift. */
 static std::uintptr_t BvhWorldFromMovRip( std::uintptr_t instr, std::uintptr_t cli )
 {
 	std::uint8_t b[ 3 ]{};
@@ -251,7 +237,6 @@ static std::uintptr_t BvhResolveVPhys2World( std::uintptr_t cli, std::uintptr_t*
 			return w2;
 	}
 
-	/** client.dll instruction dizisi imzalari tukendi; kisa cipalar ile .text taramasi. */
 	static constexpr const char* k_anchor_patterns[] = {
 		"C7 87 ? ? ? ? ? ? ? ? 48 8D 54 24 ? 48 8B CF",
 		"C7 87 ? ? ? ? ? ? ? ? 48 8D 54 24 ? 48 8B CE",
@@ -287,11 +272,6 @@ static std::uintptr_t BvhResolveVPhys2World( std::uintptr_t cli, std::uintptr_t*
 	return 0;
 }
 
-/**
- * vphysics2.dll'in .data / .rdata segmentlerini tarayarak CRnWorld singletonunu bul.
- * client.dll imzalarina hic bagimli degil; daha dayan1kli.
- */
-/** PE section listesini oku (vph: modul tabani). Hem RW hem RO data sectiolar dahil. */
 static void BvhEnumDataSections( std::uintptr_t vph,
 	std::vector<std::pair<std::uintptr_t, std::size_t>>& sections )
 {
@@ -319,17 +299,11 @@ static void BvhEnumDataSections( std::uintptr_t vph,
 	}
 }
 
-/**
- * vphysics2.dll'de CRnWorld (veya benzeri) vtable'i RTTI ile bulur;
- * sonra data sectionlarinda o vtable'a sahip bir nesneyi gosteren global pointer'i tarar.
- * Offset bilgisine gerek yoktur — versiyon bagimli degil.
- */
 static std::uintptr_t BvhResolveWorldFromVPhysMod( std::uintptr_t vph )
 {
 	if ( !vph )
 		return 0;
 
-	/** CRnWorld RTTI sinif adi adaylari (Source2 / vphysics2 isimlendirme kurallari). */
 	static constexpr const char* k_world_classes[] = {
 		"CRnWorld", "RnWorld", "CPhysics2World", "CVPhys2World",
 		"CPhysicsWorld", "RnWorldContainer", nullptr,
@@ -346,7 +320,6 @@ static std::uintptr_t BvhResolveWorldFromVPhysMod( std::uintptr_t vph )
 		}
 	}
 
-	/** Data sectionlarini bir kez enumera et. */
 	std::vector<std::pair<std::uintptr_t, std::size_t>> data_secs;
 	BvhEnumDataSections( vph, data_secs );
 
@@ -354,7 +327,6 @@ static std::uintptr_t BvhResolveWorldFromVPhysMod( std::uintptr_t vph )
 	const std::size_t cli_sz = cat_mem::module_image_size( cat_mem::client_module() );
 	const std::uintptr_t cli_base = cat_mem::client_module();
 
-	/** P'nin heap'te (hicbir modul icinde degil) olup olmadigini kontrol et. */
 	auto is_heap = [&]( std::uintptr_t P ) -> bool
 	{
 		if ( P < 0x10000 || P > 0x00007FFFFFFFFFFFULL )
@@ -398,7 +370,6 @@ static std::uintptr_t BvhResolveWorldFromVPhysMod( std::uintptr_t vph )
 		}
 	}
 
-	/** vtable ile eslesme yok; BvhLooksLikeWorld ile ikinci tur (daha katı filtreli). */
 	if ( world_vtable )
 	{
 		for ( const auto& [ sec_base, sec_size ] : data_secs )
@@ -435,7 +406,6 @@ static bool BvhLooksLikeSurfaceManager( std::uintptr_t sm )
 	return ab > 0x10000 && ab < 0x00007FFFFFFFFFFFULL;
 }
 
-/** Surface manager yoksa mesh yine cikarilir; malzeme tablosu bos kalir. */
 static std::uintptr_t BvhResolveSurfaceManager( std::uintptr_t cli, std::uintptr_t* pattern_hit_out )
 {
 	static constexpr const char* k_surface_patterns[] = {
@@ -482,7 +452,6 @@ static void BvhParseThreadFn( )
 				continue;
 			}
 
-			/** Once `%LOCALAPPDATA%\\Expectional\\maps\\<map>.tri`, sonra exe\\maps; yoksa VPK export dener. */
 			if (tri_loader::TickFileLoader()) {
 				const std::size_t n = g_world_bvh.count();
 				g_dbg_last_extracted.store(static_cast<int>(n), std::memory_order_relaxed);
@@ -512,7 +481,7 @@ static void BvhParseThreadFn( )
 	}
 }
 
-} // namespace
+} 
 
 	namespace detail {
 
@@ -960,17 +929,15 @@ static void BvhParseThreadFn( )
 			}
 		}
 		
-	} // namespace detail
+	} 
 
 	void bvh::parse( )
 	{
 		const std::uintptr_t cli = cat_mem::client_module( );
 		const std::uintptr_t vph = cat_mem::vphysics_module( );
 
-		/** 1. Strateji: vphysics2.dll data segmentini tara — imzasiz, en güvenilir. */
 		std::uintptr_t vphys2_world = BvhResolveWorldFromVPhysMod( vph );
 
-		/** 2. Strateji: client.dll icindeki pattern ile. */
 		std::uintptr_t trace_anchor = 0;
 		if ( !vphys2_world )
 			vphys2_world = BvhResolveVPhys2World( cli, &trace_anchor );
@@ -1775,7 +1742,7 @@ static void BvhParseThreadFn( )
 	{
 		if ( g_bvh_thread_started.exchange( true ) )
 			return;
-		/** std::thread + VxLang / erken CRT: CreateThread — acilis crash onleyici. */
+		
 		HANDLE th = CreateThread( nullptr, 0,
 		    []( LPVOID ) -> DWORD {
 			    BvhParseThreadFn( );
@@ -1797,4 +1764,4 @@ static void BvhParseThreadFn( )
 	uint32_t DbgParseSuccess( ) { return g_bvh_parse_successes.load( ); }
 	int DbgLastExtracted( ) { return g_dbg_last_extracted.load( ); }
 
-} // namespace ex_world_bvh
+} 

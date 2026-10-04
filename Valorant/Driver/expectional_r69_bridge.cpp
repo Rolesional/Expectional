@@ -72,7 +72,7 @@ static bool EnsureKernelDriverMapped(std::string* out_error)
 	return false;
 }
 
-} // namespace
+} 
 
 namespace expectional_r69_bridge {
 
@@ -115,4 +115,4 @@ DWORD find_cs2_process_id()
 	return find_cs2_process_id_light();
 }
 
-} // namespace expectional_r69_bridge
+} 

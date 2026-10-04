@@ -1,5 +1,4 @@
 #pragma once
-/** Misc tab ozellikleri: render IOCTL/poll throttle (kalite korunur). */
 
 #include <Windows.h>
 #include "../game/globals.hpp"
@@ -60,4 +59,4 @@ inline DWORD SlowPollMs() noexcept
 	return Settings::misc::save_fps ? 520u : 250u;
 }
 
-} // namespace ex_misc
+} 

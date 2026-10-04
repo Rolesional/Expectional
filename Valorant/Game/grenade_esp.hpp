@@ -1,8 +1,5 @@
 #pragma once
-/**
- * Catalyst benzeri: dunya nades (smoke suresi, inferno/molotov, decoy), basit grenade helper (havasim).
- * Varlik sinifi client.dll schema zinciriyle okunur; alanlar offsets_runtime + kernel read.
- */
+
 #include "globals.hpp"
 #include "offsets_runtime.hpp"
 #include "structs.hpp"
@@ -32,7 +29,6 @@
 
 namespace ex_esp {
 
-/** Dunya entity taramasi yapan Other ESP sayisi (carrier envanter/cacheGame'de; tam liste taramasi degil). */
 inline bool WorldGrenadeEspActive() noexcept {
 	return Settings::Visuals::worldGrenades || Settings::Visuals::worldInfernoHull;
 }
@@ -65,7 +61,6 @@ inline uintptr_t GameEntityByIndex(uintptr_t entity_list, int i) {
 	return g_GameMem.readv<uintptr_t>(list_entry + stride * (i & 0x1FF));
 }
 
-/** Yerdeki pickup/bomb: IOCTL/surucu yuku; mapped .sys ile BSOD riskini azaltmak icin tavan dusuk tutulur. */
 inline int ClampedPickupEntityScanMax(uintptr_t entity_list) {
 	int i_max = 1152;
 	if (offsets::dwGameEntitySystem_highestEntityIndex && entity_list) {
@@ -82,10 +77,6 @@ inline int ClampedPickupEntityScanMax(uintptr_t entity_list) {
 	return i_max;
 }
 
-/**
- * Sadece yer silahi ESP — bomb/nade ile paylasilan ClampedPickupEntityScanMax dusuk index'te birakabiliyordu.
- * IOCTL biraz artar; kaçan dusuklari azaltir.
- */
 inline int ClampedDroppedWeaponScanMax(uintptr_t entity_list) {
 	int i_max = 2048;
 	if (offsets::dwGameEntitySystem_highestEntityIndex && entity_list) {
@@ -112,7 +103,6 @@ inline int ClampedDroppedWeaponScanMax(uintptr_t entity_list) {
 	return i_max;
 }
 
-/** Dunya projectile/nade periyodik tarama. */
 inline int ClampedProjectileEntityScanMax(uintptr_t entity_list) {
 	int i_max = 2048;
 	if (offsets::dwGameEntitySystem_highestEntityIndex && entity_list) {
@@ -120,7 +110,7 @@ inline int ClampedProjectileEntityScanMax(uintptr_t entity_list) {
 			g_GameMem.readv<int>(entity_list + static_cast<uintptr_t>(offsets::dwGameEntitySystem_highestEntityIndex));
 		if (hiRead >= 1 && hiRead < 16384)
 			i_max = (std::min)(3072, (std::max)(hiRead + 256, 1024));
-		/** Cok yuksek entity index: tam aralik IOCTL maliyeti cok; ust ucu biraz dusur. */
+		
 		if (hiRead >= 10000)
 			i_max = (std::min)(i_max, 2400);
 		else if (hiRead >= 7500)
@@ -134,12 +124,6 @@ inline int ClampedProjectileEntityScanMax(uintptr_t entity_list) {
 	return i_max;
 }
 
-/**
- * Catalyst systems::entities::get_schema_hash ile ayni zincir: CEntityIdentity+0x8 -> sinif bilgisi;
- * +0x8 uzerinden iki kademeli pointer, son adres C++ sema adi (ornek C_Inferno).
- * designerName (+0x20) ile ayni metin degil; nade/inferno ESP bu adlari bekliyor.
- */
-/** Catalyst g::memory.read(schema_name, buf, 64) — tek IOCTL, char-by-char degil. */
 inline bool ReadRemoteCStringRaw(uintptr_t addr, char* out, size_t cap) {
 	if (!addr || !out || cap < 4)
 		return false;
@@ -205,7 +189,6 @@ inline bool ReadEntityDesignerClassName(uintptr_t ent, char* out, size_t cap) {
 	return false;
 }
 
-/** Once C++ sema adi, olmazsa designerName / m_name (client.dll.hpp +0x20 / +0x18). */
 inline bool ReadEntitySchemaClassName(uintptr_t ent, char* out, size_t cap) {
 	if (!ent || !out || cap < 4)
 		return false;
@@ -230,7 +213,6 @@ inline unsigned char LowerAscii(unsigned char c) {
 	return (c >= 'A' && c <= 'Z') ? static_cast<unsigned char>(c + 32u) : c;
 }
 
-/** DesignerName bazen tamamen kucuk harf gelir; strstr buyuk/kucuk harf duyarli oldugu icin ESP kaciriyordu. */
 inline bool SchemaClassEq(const char* cn, const char* lit) {
 	if (!cn || !lit)
 		return false;
@@ -268,7 +250,6 @@ enum class WorldProjectileKind : uint8_t {
 	Decoy,
 };
 
-/** Catalyst fnv1a::runtime_hash — sinif adi dogrulama / classify. */
 inline uint32_t Fnv1aRuntimeHash(const char* str) noexcept {
 	uint32_t hash = 2166136261u;
 	while (str && *str) {
@@ -278,7 +259,6 @@ inline uint32_t Fnv1aRuntimeHash(const char* str) noexcept {
 	return hash;
 }
 
-/** Catalyst collector::classify_projectile — birebir FNV hash. */
 inline WorldProjectileKind ClassifyWorldProjectileByHash(uint32_t schemaHash) {
 	switch (schemaHash) {
 	case 0x74db88a5u:
@@ -298,7 +278,6 @@ inline WorldProjectileKind ClassifyWorldProjectileByHash(uint32_t schemaHash) {
 	}
 }
 
-/** Catalyst collector::classify_projectile — birebir sinif adi. */
 inline WorldProjectileKind ClassifyWorldProjectileCatalyst(const char* cn) {
 	if (!cn || !cn[0])
 		return WorldProjectileKind::None;
@@ -320,7 +299,6 @@ inline WorldProjectileKind ClassifyWorldProjectileCatalyst(const char* cn) {
 	return WorldProjectileKind::None;
 }
 
-/** C++ schema okunamazsa designerName ile yedek (Catalyst'te yok; surucu farki icin). */
 inline WorldProjectileKind ClassifyWorldProjectileDesignerFallback(const char* cn) {
 	if (!cn || !cn[0])
 		return WorldProjectileKind::None;
@@ -351,7 +329,6 @@ inline WorldProjectileKind ClassifyWorldProjectileDesignerFallback(const char* c
 	return WorldProjectileKind::None;
 }
 
-/** Tek bir inferno yangin noktasi gecerli mi (stale/garbage filtre). */
 inline bool IsPlausibleInfernoFirePosition(const Vector3& p) {
 	if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z))
 		return false;
@@ -360,7 +337,6 @@ inline bool IsPlausibleInfernoFirePosition(const Vector3& p) {
 	return !(p.x == 0.f && p.y == 0.f && p.z == 0.f);
 }
 
-/** Catalyst: inferno ~7s; gecerli effect tick yoksa hayalet (timer donuk). */
 struct InfernoTimerState {
 	bool valid = false;
 	float remaining = 0.f;
@@ -393,7 +369,7 @@ inline bool ComputeInfernoTimer(uintptr_t ent, float curTime, InfernoTimerState&
 	out.frac = std::clamp(out.remaining / kDur, 0.f, 1.f);
 	if (out.remaining <= 0.05f)
 		return false;
-	/** Yangin basladiktan sonra timer hala dolu: bozuk/stale entity (effTick donuk). */
+	
 	const float elapsed = curTime - startTime;
 	if (elapsed > 0.75f && out.remaining > 6.85f)
 		return false;
@@ -401,7 +377,6 @@ inline bool ComputeInfernoTimer(uintptr_t ent, float curTime, InfernoTimerState&
 	return true;
 }
 
-/** Inferno suresi doldu mu (Catalyst: 7s after m_nFireEffectTickBegin). */
 inline bool InfernoExpiredByTick(uintptr_t ent, float curTime) {
 	InfernoTimerState ts;
 	if (!ComputeInfernoTimer(ent, curTime, ts))
@@ -409,7 +384,6 @@ inline bool InfernoExpiredByTick(uintptr_t ent, float curTime) {
 	return !ts.valid;
 }
 
-/** C_Inferno sinifi okunamasa bile m_fireCount + aktif yanma + gecerli konum ile tespit. */
 inline bool EntityLooksLikeInferno(uintptr_t ent, float curTime = 0.f) {
 	if (!ent || !offsets::inferno_m_fireCount || !offsets::inferno_m_firePositions ||
 	    !offsets::inferno_m_bFireIsBurning)
@@ -436,27 +410,16 @@ inline bool EntityLooksLikeInferno(uintptr_t ent, float curTime = 0.f) {
 	return ComputeInfernoTimer(ent, curTime, ts);
 }
 
-/** Catalyst entities::refresh — highestEntityIndex + IOCTL tavan. */
 inline int CatalystWorldProjectileScanMax(uintptr_t entity_list) {
 	return ClampedProjectileEntityScanMax(entity_list);
 }
 
-/** Forward decl: silah "weapon"/"knife"/"gun" filtresi — dosyada asagida tanimli. */
 inline bool SchemaLooksLikeDroppedGun(const char* cn);
 
-/** Forward decl: inferno offset imzasi hizli check — detail namespace icinde asagida. */
 namespace grenade_esp_detail {
 inline bool QuickInfernoSlotCountOk(uintptr_t ent);
 }
 
-/**
- * Classify cache: bir entity'i TEK seferde TAM siniflandirir (her chain'i dener).
- *
- * ONEMLI: tum classify chain'leri kosulsuz calistirilir, boylece cache sonucu hangi
- * scan'in cagirdigindan bagimsizdir. Bomb scan'i siniflandirdiginda grenade scan'i
- * de ayni dogru kind'i alir. (Eskiden want_* gate'leri Irrelevant cachelemesi
- * yaratiyordu → inferno/dropped/c4 gorunmuyordu.)
- */
 inline world_scan::Kind ClassifyEntityCached(uintptr_t ent, uintptr_t ident_ptr,
                                               uint16_t& out_def, float curTime) noexcept {
 	using namespace world_scan;
@@ -464,14 +427,13 @@ inline world_scan::Kind ClassifyEntityCached(uintptr_t ent, uintptr_t ident_ptr,
 		ClassifyEntry cached{};
 		if (g_classify_cache.Lookup(ent, ident_ptr, cached)) {
 			out_def = cached.def_idx;
-			/** Inferno timer dustuyse expired — ama cache'i bozma (entity hala Inferno). */
+			
 			if (cached.kind == Kind::Inferno && InfernoExpiredByTick(ent, curTime))
 				return Kind::Irrelevant;
 			return cached.kind;
 		}
 	}
 
-	/** CPP schema (catalyst hash icin) + Designer schema (eski kod weapon detection burada kullanir). */
 	char cnCpp[112]{};
 	char cnDes[112]{};
 	const bool cppOk = ReadEntityCppSchemaClassName(ent, cnCpp, sizeof cnCpp);
@@ -496,16 +458,11 @@ inline world_scan::Kind ClassifyEntityCached(uintptr_t ent, uintptr_t ident_ptr,
 	default: break;
 	}
 
-	/** Inferno offset-imza fallback (schema "C_Inferno" gelmezse bile). Bagimsiz check. */
 	if (kind == Kind::Irrelevant && grenade_esp_detail::QuickInfernoSlotCountOk(ent) &&
 	    EntityLooksLikeInferno(ent, curTime)) {
 		kind = Kind::Inferno;
 	}
 
-	/**
-	 * Silah / C4 tespiti — CPP schema yoksa designer adi kullan (eski TickDropped 'ReadEntitySchemaClassName'
-	 * combined reader idi; yerde silah olan ama cpp schema chain'i okunamayan entity'ler aksi halde kacardi).
-	 */
 	const char* cn = nullptr;
 	if (cppOk && cnCpp[0]) cn = cnCpp;
 	else if (desOk && cnDes[0]) cn = cnDes;
@@ -528,11 +485,6 @@ inline world_scan::Kind ClassifyEntityCached(uintptr_t ent, uintptr_t ident_ptr,
 		}
 	}
 
-	/**
-	 * Cache'leme kosulu: en az bir schema okuma basariliysa cache'le.
-	 * Tum okuma basarisiz olursa cache'leme — transient IOCTL failure'i bir
-	 * entity'i 'Irrelevant' olarak yapistirip 14+ saniye kacirmasin.
-	 */
 	const bool any_schema_ok = cppOk || desOk;
 	if (any_schema_ok) {
 		ClassifyEntry entry{};
@@ -580,7 +532,6 @@ inline void DrawProjTimerBar(ImDrawList* dl, float cx, float y, float frac, ImU3
 	dl->AddRectFilled(ImVec2(bx, y), ImVec2(bx + barW * std::clamp(frac, 0.f, 1.f), y + barH), fillCol, 2.f);
 }
 
-/** Catalyst projectile::draw_timer — 30x3, renk frac ile (kalan yuksek iken hiCol). */
 inline void DrawCatalystProjTimerBar(ImDrawList* dl, float cx, float yTop, float frac,
 	ImU32 hiCol, ImU32 loCol, ImU32 bgCol) {
 	const float barW = 30.f;
@@ -601,7 +552,6 @@ inline void DrawCatalystProjTimerBar(ImDrawList* dl, float cx, float yTop, float
 	dl->AddRectFilled(ImVec2(bx, by), ImVec2(bx + barW * f, by + barH), fill);
 }
 
-/** Catalyst projectile ESP: glyph ekran (cx,cy) merkezinde; cy = merkez Y. */
 inline void DrawWeaponGlyphCenterOutlined(ImDrawList* dl, float cx, float cy, const char* glyph, ImU32 col) {
 	if (!g_WeaponsIconFont || !glyph || !glyph[0])
 		return;
@@ -617,7 +567,6 @@ inline void DrawWeaponGlyphCenterOutlined(ImDrawList* dl, float cx, float cy, co
 	ImGui::PopFont();
 }
 
-/** Catalyst projectile.cpp — weapons font tek karakter. */
 inline void DrawWeaponGlyphOutlined(ImDrawList* dl, float cx, float cyTop, const char* glyph, ImU32 col,
 	float* outBottomY) {
 	if (!g_WeaponsIconFont || !glyph || !glyph[0]) {
@@ -639,7 +588,6 @@ inline void DrawWeaponGlyphOutlined(ImDrawList* dl, float cx, float cyTop, const
 		*outBottomY = y + ts.y;
 }
 
-/** Yangin sayisina gore halka segmenti (cok inferno = daha az nokta). */
 inline int InfernoHullRingCount(int nFires) noexcept {
 	if (nFires > 40)
 		return 4;
@@ -650,7 +598,6 @@ inline int InfernoHullRingCount(int nFires) noexcept {
 	return 10;
 }
 
-/** Ates konumlari degisince bir kez: dunya uzayinda halka noktalari (oyun okumasi yok). */
 inline void BuildInfernoWorldRingPoints(const Vector3* firePos, int nFires, float fireRadiusWorld,
 	std::vector<Vector3>& outWorld) {
 	outWorld.clear();
@@ -716,7 +663,6 @@ inline bool ConvexHull2DMonotoneChain(std::vector<ImVec2>& pts, std::vector<ImVe
 	return true;
 }
 
-/** Kamera her kare: yalnizca w2s + convex hull (ates okumasi yok). */
 inline bool ProjectInfernoScreenHull(const view_matrix_t& vm, const std::vector<Vector3>& worldPts,
 	std::vector<ImVec2>& outHull) {
 	thread_local std::vector<ImVec2> tls_pts;
@@ -731,7 +677,6 @@ inline bool ProjectInfernoScreenHull(const view_matrix_t& vm, const std::vector<
 	return ConvexHull2DMonotoneChain(tls_pts, outHull);
 }
 
-/** Tek seferlik yol (fallback / eski cagri). */
 inline bool BuildInfernoScreenHull(const view_matrix_t& vm, const Vector3* firePos, int nFires,
 	float fireRadiusWorld, std::vector<ImVec2>& outHull) {
 	thread_local std::vector<Vector3> tls_world;
@@ -746,7 +691,6 @@ inline void DrawInfernoHullOverlay(ImDrawList* dl, const std::vector<ImVec2>& hu
 	dl->AddPolyline(hull.data(), static_cast<int>(hull.size()), lineCol, ImDrawFlags_Closed, 2.f);
 }
 
-/** Catalyst collector::collect_projectiles molotov_fire — yalnizca yanmakta olan slotlar. */
 inline bool CollectInfernoFiresCatalyst(uintptr_t ent, std::vector<Vector3>& fires, float& outExpireTime,
 	float curTime = 0.f, InfernoTimerState* timerOut = nullptr) {
 	fires.clear();
@@ -781,9 +725,8 @@ inline bool CollectInfernoFiresCatalyst(uintptr_t ent, std::vector<Vector3>& fir
 	return true;
 }
 
-/** Convex hull; basarisiz olursa catalyst gibi cizilmez (fallback halka yok). */
 inline void DrawInfernoHullOrFallback(ImDrawList* dl, const view_matrix_t& vm, const std::vector<Vector3>& fires,
-	ImU32 hullFill, ImU32 hullLine, ImU32 /*fallbackRing*/) {
+	ImU32 hullFill, ImU32 hullLine, ImU32 ) {
 	if (fires.empty() || !Settings::Visuals::worldInfernoHull)
 		return;
 	thread_local std::vector<ImVec2> tls_hull;
@@ -799,7 +742,7 @@ inline bool GrenadeEspCullSkip(const Vector3& worldPos);
 }
 
 inline void DrawInfernoFireEsp(ImDrawList* dl, const view_matrix_t& vm, uintptr_t ent,
-	const std::vector<Vector3>& fires, float curTime, float /*expireTime*/) {
+	const std::vector<Vector3>& fires, float curTime, float ) {
 	if (fires.empty())
 		return;
 
@@ -827,7 +770,7 @@ inline void DrawInfernoFireEsp(ImDrawList* dl, const view_matrix_t& vm, uintptr_
 	center.x *= inv;
 	center.y *= inv;
 	center.z *= inv;
-	/** Merkez yerine: yayilmada bir yangin noktasi menzildeyse inferno etiketi cizilir. */
+	
 	{
 		bool anyInRange = false;
 		for (const Vector3& f : fires) {
@@ -870,10 +813,8 @@ inline void DrawInfernoFireEsp(ImDrawList* dl, const view_matrix_t& vm, uintptr_
 
 namespace grenade_esp_detail {
 
-/** Yerel oyuncudan daha uzaktaki nade ESP cizilmez (Source birimleri ~ inch). */
 constexpr float kWorldGrenadeEspMaxDist = 26000.f;
 
-/** Entity listesi taramasi: seyrek; canli veri cache'ten her kare yenilenir. */
 constexpr unsigned kScanEveryNFrames = 4u;
 inline unsigned WorldGrenadeScanPeriodFrames() {
 	if (Settings::Visuals::worldGrenades || Settings::Visuals::worldInfernoHull)
@@ -907,7 +848,6 @@ inline void SetupGrenadeEspSpatialCull(uintptr_t localPawn) {
 	g_spatialCullDistSq = d * d;
 }
 
-/** true = bu dunya noktasini cizmeyi atla (mesafe buyuk). */
 inline bool GrenadeEspCullSkip(const Vector3& worldPos) {
 	if (g_spatialCullDistSq <= 0.f)
 		return false;
@@ -941,7 +881,6 @@ inline uint32_t HashInfernoFires(const std::vector<Vector3>& fires) {
 	return h | 1u;
 }
 
-/** Periyodik entity taramasi ciktisi (pointer listesi). */
 inline std::vector<uintptr_t> g_discovered_infernos;
 inline std::vector<uintptr_t> g_cachedSmokes;
 inline std::vector<uintptr_t> g_cachedMollyAirs;
@@ -949,7 +888,6 @@ inline std::vector<uintptr_t> g_cachedDecoys;
 inline std::vector<uintptr_t> g_cachedHe;
 inline std::vector<uintptr_t> g_cachedFlash;
 
-/** Overlay cizim cache — yalnizca cache'lenmis entity'ler uzerinde IOCTL. */
 struct InfernoDrawEntry {
 	uintptr_t ent = 0;
 	std::vector<Vector3> fires;
@@ -1249,7 +1187,7 @@ inline void DrawInfernoFromCache(ImDrawList* dl, const InfernoDrawEntry& e, bool
 	DrawCatalystProjTimerBar(dl, sx, sy + yOff + 6.f, frac, hiTimer, loTimer, barBg);
 }
 
-inline void DrawProjectileFromCache(ImDrawList* dl, const ProjectileDrawEntry& e, float /*curTime*/) {
+inline void DrawProjectileFromCache(ImDrawList* dl, const ProjectileDrawEntry& e, float ) {
 	const float sx = e.sp.x;
 	const float sy = e.sp.y;
 
@@ -1332,21 +1270,19 @@ inline void DrawProjectileFromCache(ImDrawList* dl, const ProjectileDrawEntry& e
 	}
 }
 
-/** Molotov hull tek basina: sinif adi okumadan sadece inferno offset imzasi. */
 inline void ScanInfernosOnlyFast(uintptr_t entity_list, float curTime) {
 	ClearInfernoCacheOnly();
 	if (!entity_list || !offsets::inferno_m_fireCount)
 		return;
 	const int i_max = CatalystWorldProjectileScanMax(entity_list);
-	/** BATCH IOCTL: blok pointer tablolari tek IOCTL ile (eskiden per-entity). */
-	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int /*idx*/, uintptr_t ent) {
+	
+	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int , uintptr_t ent) {
 		if (!QuickInfernoSlotCountOk(ent))
 			return;
 		TryPushInfernoWorldCache(ent, curTime);
 	});
 }
 
-/** Catalyst collector::collect_projectiles — entity list taramasi (batch IOCTL + cache). */
 inline void ScanWorldProjectilesCatalyst(uintptr_t entity_list, bool wantInferno, bool wantProjectiles,
 	uint32_t localPawnH, bool localOnly, float curTime) {
 	if (wantInferno && !wantProjectiles) {
@@ -1368,9 +1304,8 @@ inline void ScanWorldProjectilesCatalyst(uintptr_t entity_list, bool wantInferno
 		world_scan::g_classify_cache.NextTick();
 	}
 
-	/** BATCH IOCTL: 512-blok pointer tablolari tek pass. */
-	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int /*idx*/, uintptr_t ent) {
-		/** FAST PATH: cache "ilgisiz" → identity IOCTL atla. */
+	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int , uintptr_t ent) {
+		
 		{
 			std::lock_guard<std::mutex> ck(world_scan::g_classify_mtx);
 			if (world_scan::g_classify_cache.PeekAndTouchIrrelevant(ent))
@@ -1421,7 +1356,6 @@ inline void ScanWorldProjectilesCatalyst(uintptr_t entity_list, bool wantInferno
 	});
 }
 
-/** Kurulu / yerdeki C4 + bombaci + dusmus silah: IOCTL tarama (seyrek), cizim her kare cache. */
 struct CachedPlantedBombWorld {
 	bool show = false;
 	Vector3 world{};
@@ -1508,7 +1442,7 @@ inline int UnifiedPickupEntityScanMax(uintptr_t entity_list, bool need_dropped_s
 	return ClampedPickupEntityScanMax(entity_list);
 }
 
-} // namespace grenade_esp_detail
+} 
 
 inline void DrawSmokeProjectileWorldEsp(ImDrawList* dl, const view_matrix_t& vm, uintptr_t ent,
 	float curTime, uint32_t localPawnH, bool localOnly) {
@@ -1653,7 +1587,6 @@ inline void DrawHeFlashProjectileWorldEsp(ImDrawList* dl, const view_matrix_t& v
 	StrokeTextBg(dl, lab, sx, y0, gc);
 }
 
-/** IOCTL + entity taramasi — yalnizca cacheGame (render thread mutex bloklamaz). */
 inline void TickWorldGrenadeEspDataCache() {
 	const bool wg = Settings::Visuals::worldGrenades;
 	const bool hull = Settings::Visuals::worldInfernoHull;
@@ -1689,7 +1622,6 @@ inline void TickWorldGrenadeEspDataCache() {
 		}
 	}
 
-	/** Render thread'in IOCTL'siz cull yapabilmesi icin cull origin'i burada guncelle. */
 	grenade_esp_detail::SetupGrenadeEspSpatialCull(global_pawn);
 
 	if (wantInferno) {
@@ -1710,7 +1642,6 @@ inline void TickWorldGrenadeEspDataCache() {
 	}
 }
 
-/** Overlay: yalnizca w2s + cizim (surucu okuma yok). */
 inline void DrawWorldGrenadeEsp(const view_matrix_t& vm) {
 	const bool wg = Settings::Visuals::worldGrenades;
 	const bool hull = Settings::Visuals::worldInfernoHull;
@@ -1719,8 +1650,6 @@ inline void DrawWorldGrenadeEsp(const view_matrix_t& vm) {
 		return;
 
 	std::lock_guard<std::mutex> lk(grenade_esp_detail::g_worldGrenadeCacheMutex);
-
-	/** Cull origin cacheGame'de set ediliyor (IOCTL render thread'de degil). */
 
 	const float curTime = GlobalCurTime();
 	const uint32_t vm_hash = grenade_esp_detail::HashViewMatrixCoarse(vm);
@@ -1757,10 +1686,10 @@ constexpr float kDegToRad = 3.14159265f / 180.f;
 constexpr float kTickInterval = 1.f / 64.f;
 constexpr float kGravityScale = 0.4f;
 constexpr float kElasticity = 0.45f;
-/** Simülasyon üst sınırı (tick); uzun yuvarlanma / düşük sürtünme için yüksek tutulur. */
+
 constexpr int kMaxTicks = 16384;
 constexpr int kTicksPerPoint = 4;
-/** sv_gravity okuyucu yok; Catalyst ile ayni varsayilan. */
+
 constexpr float kDefaultSvGravity = 800.f;
 
 inline float vec_dot(const Vector3& a, const Vector3& b) {
@@ -1788,7 +1717,6 @@ inline Vector3 vec_normalized(const Vector3& v) {
 	return vec_scale(v, 1.f / L);
 }
 
-/** Catalyst math::vector3::to_directions — pitch=x yaw=y roll=z */
 inline void angles_to_directions(const Vector3& angles, Vector3* forward, Vector3* right, Vector3* up) {
 	const float sp = std::sinf(angles.x * kDegToRad);
 	const float cp = std::cosf(angles.x * kDegToRad);
@@ -1813,7 +1741,6 @@ inline void angles_to_directions(const Vector3& angles, Vector3* forward, Vector
 	}
 }
 
-/** Catalyst systems::view::update — CViewRender + 0x10, origin+0 angles+0xC */
 inline bool read_cview_render_origin_angles(Vector3& origin, Vector3& angles) {
 	static uintptr_t view_render_inst = 0;
 	if (!client)
@@ -1868,7 +1795,6 @@ inline void resolve_collision_cat(const ex_world_bvh::bvh::trace_result& trace, 
 	}
 }
 
-/** Overlay trajectory: tek trace/tick — slide trace yok (2x BVH maliyeti kaldirildi). */
 inline void resolve_collision_overlay(const ex_world_bvh::bvh::trace_result& trace, Vector3& vel) {
 	const float total_elasticity = std::clamp(kElasticity, 0.f, 0.9f);
 	const float backoff = vec_dot(vel, trace.normal) * 2.f;
@@ -1922,18 +1848,18 @@ inline void step_simulation_cat(Vector3& pos, Vector3& vel, float sv_gravity, ex
 
 inline bool should_detonate_cat(std::uint16_t defIdx, const Vector3& vel, int tick, float detonate_time, float velocity_threshold) {
 	switch (defIdx) {
-	case 45: /* smoke */
-	case 47: /* decoy */
+	case 45: 
+	case 47: 
 	{
 		const float speed_2d = std::sqrtf(vel.x * vel.x + vel.y * vel.y);
 		const int check_ticks = static_cast<int>(0.2f / kTickInterval);
 		return speed_2d < velocity_threshold && check_ticks > 0 && (tick % check_ticks) == 0;
 	}
-	case 46: /* molotov */
-	case 48: /* inc */
+	case 46: 
+	case 48: 
 		return static_cast<float>(tick) * kTickInterval > detonate_time;
-	case 43: /* flash */
-	case 44: /* he */
+	case 43: 
+	case 44: 
 		return static_cast<float>(tick - 8) * kTickInterval > detonate_time;
 	default:
 		return false;
@@ -1958,13 +1884,11 @@ inline void weapon_timing_cat(std::uint16_t defIdx, float& detonate_time, float&
 	}
 }
 
-/** Render thread artik kullanmiyor; worker tek seferde tamamlar. */
 constexpr int kTrajTracesPerFrame = 12;
 constexpr int kTrajWorkerMaxTicks = 320;
 constexpr int kTrajSimCapHardMax = 1024;
 constexpr int kTrajFastPreviewSteps = 36;
 
-/** Worker tam BVH (CatalystSimulateFull) — render_opt ust siniri; save_fps worker'i kirpmaz. */
 inline int EffectiveGrenadeHelperMaxTicks() noexcept {
 	int t = std::clamp(Settings::render_opt::grenade_helper_max_ticks, 128, kTrajSimCapHardMax);
 	if (Settings::misc::save_fps && t > 320)
@@ -1999,7 +1923,6 @@ struct TrajectorySimState {
 	}
 };
 
-/** Worker/cache bucket: ince aci degisiminde BVH yolu kaybolmasin. */
 inline uint32_t HashTrajectoryLookup(std::uint16_t defIdx, float strength, const Vector3& angles,
                                       const Vector3& origin, const Vector3& pawnVel) {
 	const float ang_q = Settings::misc::save_fps ? 3.f : 2.f;
@@ -2034,7 +1957,6 @@ inline uint32_t HashTrajectoryInputs(std::uint16_t defIdx, float strength, const
 	return h;
 }
 
-/** @deprecated HashTrajectoryInputs kullan — bu cok kaba quantize ediyordu. */
 inline std::uint32_t HashTrajectoryCoarse(std::uint16_t defIdx, float strength, const Vector3& angles,
                                           const Vector3& origin) {
 	return HashTrajectoryInputs(defIdx, strength, angles, origin, Vector3{});
@@ -2064,7 +1986,6 @@ inline void TrajectoryRunFastPreview(TrajectorySimState& st) {
 	TrajectoryFinalizePoints(st);
 }
 
-/** Catalyst setup_throw: gozden ileri BVH trace ile spawn (duvara yakin atis). */
 inline Vector3 ComputeGrenadeThrowSpawn(const Vector3& eye_pos, const Vector3& forward) {
 	if (!ex_world_bvh::g_world_bvh.valid())
 		return vec_add(eye_pos, vec_scale(forward, 16.f));
@@ -2133,8 +2054,6 @@ inline void TrajectoryAdvanceBvh(TrajectorySimState& st, int max_traces) {
 	}
 }
 
-/** VM + yol hash degismeden w2s tekrarlanmaz (overlay 500fps hedefi). */
-/** Uzun BVH segmentlerine hafif ara nokta — cok seyrek degil, FPS icin sinirli. */
 inline void DensifyTrajectoryPath(const std::vector<Vector3>& sparse, const Vector3& end_pos,
                                   std::vector<Vector3>& dense) {
 	dense.clear();
@@ -2241,7 +2160,6 @@ inline void DrawTrajectoryPolyline(const view_matrix_t& vm, const std::vector<Ve
 	DrawTrajectoryPolylineCached(vm, points, end_pos, 0u);
 }
 
-/** Catalyst systems::view::update — once CViewRender (origin+angles), sonra yedek. */
 inline bool GatherGrenadeThrowView(uintptr_t localPawn, const Vector3& eyeWorldFallback, Vector3& out_origin,
                                    Vector3& out_angles) {
 	out_angles = Vector3{};
@@ -2280,7 +2198,6 @@ inline bool GatherGrenadeThrowView(uintptr_t localPawn, const Vector3& eyeWorldF
 	return true;
 }
 
-/** Catalyst misc::grenades::simulate — birebir (max_ticks=1024, ticks_per_point=4, slide trace). */
 struct CatalystTrajectory {
 	std::vector<Vector3> points;
 	Vector3 end_pos{};
@@ -2355,7 +2272,6 @@ inline void CatalystSimulateFull(std::uint16_t defIdx, const Vector3& start, con
 	}
 }
 
-/** Worker: slide trace yok — ~2x daha hizli, duvar carpismasi korunur. */
 inline void CatalystSimulateOverlay(std::uint16_t defIdx, const Vector3& start, const Vector3& velocity,
                                     CatalystTrajectory& out, int max_ticks = kTrajWorkerMaxTicks) {
 	constexpr int kCatTicksPerPoint = 4;
@@ -2422,7 +2338,6 @@ inline void CatalystSimulateOverlay(std::uint16_t defIdx, const Vector3& start, 
 	}
 }
 
-/** Catalyst misc::grenades::can_predict + pin edge (throw cooldown). */
 inline std::chrono::steady_clock::time_point g_catalyst_last_throw_time{};
 inline bool g_catalyst_was_holding_pin = false;
 
@@ -2455,7 +2370,6 @@ inline bool CatalystCanPredict(std::uintptr_t weapon, std::uint16_t defIdx) {
 	return true;
 }
 
-/** Catalyst misc::grenades::setup_throw */
 inline bool CatalystSetupThrow(std::uintptr_t weapon, std::uintptr_t localPawn, float throw_velocity,
                                Vector3 view_origin, Vector3 view_angles, Vector3& out_origin, Vector3& out_velocity) {
 	float strength = 1.f;
@@ -2498,7 +2412,7 @@ inline bool CatalystSetupThrow(std::uintptr_t weapon, std::uintptr_t localPawn, 
 	return true;
 }
 
-} // namespace grenade_cat_detail
+} 
 
 inline bool SchemaLooksLikeDroppedGun(const char* cn) {
 	if (!cn || !cn[0])
@@ -2555,7 +2469,6 @@ inline bool DroppedWeaponShouldHideWhileBoundToCorpse(uintptr_t weaponEnt) {
 	return hp <= 0 || hp > 100;
 }
 
-/** Bomb world color + bombaci: hafif tarama (dusmus silah listesi degil). */
 inline void TickBombWorldEspCache(uintptr_t localPawn) {
 	using namespace grenade_esp_detail;
 	const bool need_bomb_world = Settings::Visuals::bombWorldEsp;
@@ -2590,12 +2503,10 @@ inline void TickBombWorldEspCache(uintptr_t localPawn) {
 		world_scan::g_classify_cache.NextTick();
 	}
 
-	/** BATCH IOCTL: tek pass'te 512-blok pointer tablolari okunur (eskiden per-entity 1 IOCTL). */
-	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int /*idx*/, uintptr_t ent) {
+	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int , uintptr_t ent) {
 		if (ent == global_pawn)
 			return;
 
-		/** FAST PATH: cache'te "ilgisiz" olarak isaretliyse identity okumayi atla. */
 		{
 			std::lock_guard<std::mutex> ck(world_scan::g_classify_mtx);
 			if (world_scan::g_classify_cache.PeekAndTouchIrrelevant(ent))
@@ -2641,7 +2552,6 @@ inline void TickBombWorldEspCache(uintptr_t localPawn) {
 	if (need_bomb_world)
 		PruneGroundC4Cache(scan_now);
 
-	/** Periyodik cache temizligi (gitmis entity'leri at). */
 	{
 		std::lock_guard<std::mutex> ck(world_scan::g_classify_mtx);
 		if ((world_scan::g_classify_cache.Tick() & 0x3Fu) == 0u)
@@ -2649,7 +2559,6 @@ inline void TickBombWorldEspCache(uintptr_t localPawn) {
 	}
 }
 
-/** Dusmus silah: agir entity taramasi — cacheGame'de seyrek; overlay IOCTL yok. */
 inline void TickDroppedWeaponEspCache(uintptr_t localPawn, bool rebuild_equipped_ignore) {
 	using namespace grenade_esp_detail;
 	if (!Settings::Visuals::droppedWeaponEsp)
@@ -2679,12 +2588,10 @@ inline void TickDroppedWeaponEspCache(uintptr_t localPawn, bool rebuild_equipped
 		world_scan::g_classify_cache.NextTick();
 	}
 
-	/** BATCH IOCTL: 512'lik bloklar tek pass'te okunur (eskiden 2048 IOCTL → ~4 IOCTL). */
-	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int /*idx*/, uintptr_t ent) {
+	world_scan::EnumerateLiveEntities(entity_list, i_max, [&](int , uintptr_t ent) {
 		if (ent == global_pawn)
 			return;
 
-		/** FAST PATH: ilgisiz cache hit → identity IOCTL atla. */
 		{
 			std::lock_guard<std::mutex> ck(world_scan::g_classify_mtx);
 			if (world_scan::g_classify_cache.PeekAndTouchIrrelevant(ent))
@@ -2744,7 +2651,6 @@ inline void TickDroppedWeaponEspCache(uintptr_t localPawn, bool rebuild_equipped
 	});
 }
 
-/** Geriye uyumluluk — ayri bomb/dropped zamanlayicilari tercih edilir. */
 inline void TickWorldPickupEspScan(uintptr_t localPawn, bool rebuild_equipped_ignore) {
 	TickBombWorldEspCache(localPawn);
 	TickDroppedWeaponEspCache(localPawn, rebuild_equipped_ignore);
@@ -2760,7 +2666,6 @@ inline void ApplyCachedC4CarrierFlags(std::vector<UE4Structs::CS2Entity>& player
 	}
 }
 
-/** MergeWorldCarriedC4CarrierFlags: cacheGame icin — tam liste taramasi yapmaz. */
 inline void MergeWorldCarriedC4CarrierFlags(std::vector<UE4Structs::CS2Entity>& players) {
 	ApplyCachedC4CarrierFlags(players);
 }
@@ -2775,7 +2680,6 @@ inline bool ShouldRunWorldPickupEspScanThisFrame() noexcept {
 	return (grenade_esp_detail::g_pickupScanCounter++ % WorldPickupEspScanPeriodFrames()) == 0u;
 }
 
-/** Yer + kurulu bomba — yalnizca cache + w2s (IOCTL yok). */
 inline void DrawBombWorldEsp(const view_matrix_t& vm) {
 	if (!Settings::Visuals::bombWorldEsp || !client)
 		return;
@@ -2807,7 +2711,6 @@ inline void DrawBombWorldEsp(const view_matrix_t& vm) {
 	}
 }
 
-/** Dusmus silah — yalnizca cache + w2s (surucu okuma yok). */
 inline void DrawDroppedWeaponsWorldEsp(const view_matrix_t& vm) {
 	if (!Settings::Visuals::droppedWeaponEsp)
 		return;
@@ -2842,4 +2745,4 @@ inline void DrawDroppedWeaponsWorldEsp(const view_matrix_t& vm) {
 	}
 }
 
-} // namespace ex_esp
+} 

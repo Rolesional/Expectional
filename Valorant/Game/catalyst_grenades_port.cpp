@@ -129,7 +129,6 @@ bool build_throw_params(std::uintptr_t weapon, std::uintptr_t pawn, float throw_
 	return true;
 }
 
-/** BVH yokken de gorunur — aninda, 0 trace. */
 void build_fast_arc(const ThrowParams& tp, Trajectory& out)
 {
 	out.points.clear();
@@ -320,7 +319,7 @@ void draw_trajectory(const view_matrix_t& vm, const Trajectory& traj)
 		dl->AddCircleFilled(ImVec2(es.x, es.y), 5.f, detCol, 14);
 }
 
-}  // namespace
+}  
 
 void OnRender(const view_matrix_t& vm, std::uintptr_t local_pawn, const Vector3& eye_fallback)
 {
@@ -340,7 +339,6 @@ void OnRender(const view_matrix_t& vm, std::uintptr_t local_pawn, const Vector3&
 	if (!wpn)
 		return;
 
-	/** Pin cekilmeden sim/IOCTL yapma — Valve MM'de gereksiz lag. */
 	if (offsets::nade_m_bPinPulled) {
 		const bool pin = g_GameMem.readv<bool>(wpn + static_cast<std::uintptr_t>(offsets::nade_m_bPinPulled));
 		if (!pin)
@@ -364,7 +362,6 @@ void OnRender(const view_matrix_t& vm, std::uintptr_t local_pawn, const Vector3&
 	if (!build_throw_params(wpn, local_pawn, throwVel, eye_fallback, tp))
 		return;
 
-	/** Input hash — ayni nisan/pozisyonda yeniden sim yapma. */
 	std::uint32_t h = static_cast<std::uint32_t>(tp.def_idx);
 	auto qf = [](float f) -> std::uint32_t {
 		return static_cast<std::uint32_t>(std::lround(f * 2.f)) & 0xFFFFu;
@@ -391,4 +388,4 @@ void OnRender(const view_matrix_t& vm, std::uintptr_t local_pawn, const Vector3&
 	draw_trajectory(vm, traj);
 }
 
-}  // namespace catalyst_grenades_port
+}  

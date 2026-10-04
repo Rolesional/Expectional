@@ -2,14 +2,10 @@
 #include "offsets_embed_resource.h"
 
 #include <Windows.h>
-#include <winhttp.h>
-
 #include <cstdio>
 #include <cstring>
 #include <string>
 #include <vector>
-
-#pragma comment(lib, "winhttp.lib")
 
 #include "Protection/vxlang_per_tu.hpp"
 
@@ -42,93 +38,7 @@ static bool LoadFileToString(const wchar_t* filePath, std::string& out) {
 	return !out.empty();
 }
 
-} // namespace
-
-bool HttpGetExpectionalDev(const wchar_t* path, std::string& bodyOut) {
-	bodyOut.clear();
-	if (!path || !path[0])
-		return false;
-
-	HINTERNET hSession = WinHttpOpen(
-	    L"Expectional-Offsets/1.0",
-	    WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-	    WINHTTP_NO_PROXY_NAME,
-	    WINHTTP_NO_PROXY_BYPASS,
-	    0);
-	if (!hSession)
-		return false;
-
-	DWORD redirectPolicy = WINHTTP_OPTION_REDIRECT_POLICY_ALWAYS;
-	WinHttpSetOption(hSession, WINHTTP_OPTION_REDIRECT_POLICY, &redirectPolicy, sizeof redirectPolicy);
-
-	HINTERNET hConnect = WinHttpConnect(hSession, L"expectional.dev", INTERNET_DEFAULT_HTTPS_PORT, 0);
-	if (!hConnect) {
-		WinHttpCloseHandle(hSession);
-		return false;
-	}
-
-	HINTERNET hRequest = WinHttpOpenRequest(
-	    hConnect,
-	    L"GET",
-	    path,
-	    nullptr,
-	    WINHTTP_NO_REFERER,
-	    WINHTTP_DEFAULT_ACCEPT_TYPES,
-	    WINHTTP_FLAG_SECURE | WINHTTP_FLAG_REFRESH);
-	if (!hRequest) {
-		WinHttpCloseHandle(hConnect);
-		WinHttpCloseHandle(hSession);
-		return false;
-	}
-
-	if (!WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) ||
-	    !WinHttpReceiveResponse(hRequest, nullptr)) {
-		WinHttpCloseHandle(hRequest);
-		WinHttpCloseHandle(hConnect);
-		WinHttpCloseHandle(hSession);
-		return false;
-	}
-
-	DWORD status = 0;
-	DWORD statusSize = sizeof status;
-	if (WinHttpQueryHeaders(
-	        hRequest,
-	        WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-	        WINHTTP_HEADER_NAME_BY_INDEX,
-	        &status,
-	        &statusSize,
-	        WINHTTP_NO_HEADER_INDEX) &&
-	    status != 200) {
-		WinHttpCloseHandle(hRequest);
-		WinHttpCloseHandle(hConnect);
-		WinHttpCloseHandle(hSession);
-		return false;
-	}
-
-	std::vector<char> buf;
-	for (;;) {
-		DWORD avail = 0;
-		if (!WinHttpQueryDataAvailable(hRequest, &avail))
-			break;
-		if (avail == 0)
-			break;
-		const size_t old = buf.size();
-		buf.resize(old + avail);
-		DWORD read = 0;
-		if (!WinHttpReadData(hRequest, buf.data() + old, avail, &read) || read == 0)
-			break;
-		buf.resize(old + read);
-	}
-
-	WinHttpCloseHandle(hRequest);
-	WinHttpCloseHandle(hConnect);
-	WinHttpCloseHandle(hSession);
-
-	if (buf.empty())
-		return false;
-	bodyOut.assign(buf.data(), buf.size());
-	return !bodyOut.empty();
-}
+} 
 
 namespace offsets {
 std::ptrdiff_t dwEntityList = 0;
@@ -226,19 +136,9 @@ std::ptrdiff_t entity_m_nSubclassID = 0;
 std::uint32_t entity_controller_stride = 112;
 }
 
-/**
- * DLL build'inde GetModuleHandleW(nullptr) HOST exe'yi (notepad.exe) dondurur,
- * RCDATA orada YOK. Kendi DLL modulumuzu adres-based lookup ile bul.
- */
-/**
- * Manual-map injection: LDR list'te modul olmadigi icin GetModuleHandleExW(FROM_ADDRESS)
- * cogu zaman FAIL eder; FindResourceW ise tamamen LDR ile cagrisir => "offsets failed to load".
- * Cozum: kendi adresimizden VirtualQuery -> AllocationBase ile DLL base bul, sonra PE
- * resource directory'sini elle gez ve RCDATA payload'unu cek. LoadLibrary'siz, LDR'siz.
- */
 static const uint8_t* ExpectionalGetSelfBase()
 {
-	/** Once klasik yolu dene (LoadLibrary ile yuklenmisse en hizlisi). */
+	
 	HMODULE mod = nullptr;
 	if (GetModuleHandleExW(
 			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -248,7 +148,6 @@ static const uint8_t* ExpectionalGetSelfBase()
 		return reinterpret_cast<const uint8_t*>(mod);
 	}
 
-	/** Manual-mapped fallback: kod sayfamizin AllocationBase'i = image base. */
 	MEMORY_BASIC_INFORMATION mbi{};
 	if (VirtualQuery(reinterpret_cast<const void*>(&ExpectionalGetSelfBase), &mbi, sizeof(mbi)) == sizeof(mbi)
 	    && mbi.AllocationBase)
@@ -258,10 +157,6 @@ static const uint8_t* ExpectionalGetSelfBase()
 	return nullptr;
 }
 
-/**
- * IMAGE_RESOURCE_DIRECTORY agacinda RT_RCDATA -> resourceId -> lang dallarini bul ve
- * IMAGE_RESOURCE_DATA_ENTRY.OffsetToData (RVA) ile payload pointer + size dondur.
- */
 static bool ExpectionalFindRcDataInPE(const uint8_t* base, int resourceId, const uint8_t*& outData, uint32_t& outSize)
 {
 	outData = nullptr;
@@ -284,7 +179,7 @@ static bool ExpectionalFindRcDataInPE(const uint8_t* base, int resourceId, const
 	const auto* L1 = entriesOf(root);
 	const int n1 = root->NumberOfNamedEntries + root->NumberOfIdEntries;
 	for (int i = 0; i < n1; ++i) {
-		/** Level 1: type. RT_RCDATA = 10. */
+		
 		if (L1[i].NameIsString) continue;
 		if (L1[i].Id != static_cast<DWORD>(reinterpret_cast<uintptr_t>(RT_RCDATA))) continue;
 		if (!L1[i].DataIsDirectory) continue;
@@ -299,7 +194,7 @@ static bool ExpectionalFindRcDataInPE(const uint8_t* base, int resourceId, const
 			const auto* L3 = entriesOf(d3);
 			const int n3 = d3->NumberOfNamedEntries + d3->NumberOfIdEntries;
 			if (n3 <= 0) return false;
-			/** Level 3: language. Ilk dili al. */
+			
 			if (L3[0].DataIsDirectory) return false;
 			const auto* de = reinterpret_cast<const IMAGE_RESOURCE_DATA_ENTRY*>(resBase + L3[0].OffsetToData);
 			outData = base + de->OffsetToData;
@@ -321,7 +216,6 @@ static bool LoadRcDataToString(int resourceId, std::string& out)
 		return !out.empty();
 	}
 
-	/** Son care: LDR yolu (manual-map'te calismaz, ama LoadLibrary'le yuklendiyse calisir). */
 	HMODULE mod = nullptr;
 	GetModuleHandleExW(
 		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -366,10 +260,6 @@ static std::ptrdiff_t ParseOffset(const std::string& content, const std::string&
     }
 }
 
-/**
- * Genel ParseOffset("m_fireCount") baska bir siniftaki ayni isimli alani yakalayabiliyor.
- * Molotov hull icin C_Inferno blogundan oku (a2x / client_dll).
- */
 static bool TryApplyInfernoOffsetsFromClassBlock(const std::string& clientContent) {
     using namespace offsets;
     static const char* kMarkers[] = {
@@ -410,7 +300,7 @@ static bool TryApplyInfernoOffsetsFromClassBlock(const std::string& clientConten
                     inferno_m_bFireIsBurning = burn;
                 if (eff)
                     inferno_m_nFireEffectTickBegin = eff;
-                //printf("[offsets] C_Inferno scoped inferno: fireCount=0x%llX firePositions=0x%llX burn=0x%llX tickBegin=0x%llX\n",
+                
                     (unsigned long long)inferno_m_fireCount,
                     (unsigned long long)inferno_m_firePositions,
                     (unsigned long long)inferno_m_bFireIsBurning,
@@ -423,7 +313,6 @@ static bool TryApplyInfernoOffsetsFromClassBlock(const std::string& clientConten
     return false;
 }
 
-/** Yer silahi / C_EconEntity: m_AttributeManager + m_Item + m_iItemDefinitionIndex (Catalyst shared.cpp ile ayni zincir). */
 static bool TryApplyEconEntityOffsetsFromClassBlock(const std::string& clientContent) {
     using namespace offsets;
     static const char* kMarkers[] = {
@@ -457,7 +346,7 @@ static bool TryApplyEconEntityOffsetsFromClassBlock(const std::string& clientCon
             const std::ptrdiff_t am = ParseOffset(block, "m_AttributeManager");
             if (am > 0 && am < 0x4000) {
                 m_Econ_AttributeManager = am;
-               // printf("[offsets] C_EconEntity m_AttributeManager=0x%llX (dropped weapon econ path)\n",
+               
                     (unsigned long long)m_Econ_AttributeManager;
                 return true;
             }
@@ -467,7 +356,6 @@ static bool TryApplyEconEntityOffsetsFromClassBlock(const std::string& clientCon
     return false;
 }
 
-/** CCSPlayerController + CBasePlayerController — rank / steam (client_dll.hpp ile uyumlu scoped parse). */
 static bool TryApplyControllerRankFieldsFromDump(const std::string& clientContent) {
     using namespace offsets;
     auto parseBlock = [&](const char* mk) -> std::string {
@@ -529,7 +417,6 @@ static bool TryApplyControllerRankFieldsFromDump(const std::string& clientConten
     return ok;
 }
 
-/** C_VoteController — client_dll / cs2-sdk.com (oylama). */
 static bool TryApplyVoteControllerOffsetsFromClassBlock(const std::string& clientContent)
 {
     using namespace offsets;
@@ -578,8 +465,6 @@ static bool TryApplyVoteControllerOffsetsFromClassBlock(const std::string& clien
     return true;
 }
 
-/** Web yok / parse bozuk: oyun acilmaz diye gomulu taban (web oncelikli). */
-/** Fallback offsets — a2x/cs2-dumper 2026-07-09 dump'indan guncellendi. */
 void ApplyFallbackOffsets() {
     using namespace offsets;
     dwEntityList = 0x254EE60;
@@ -657,7 +542,7 @@ void ApplyFallbackOffsets() {
     m_aimPunchUnpredictableRel = 0xA4;
     m_aimPunchPredictableRel = 0x50;
     m_aimPunchAngle = 0x16CC;
-    /** C_Inferno — a2x cs2-dumper 2026-07-09 dump. */
+    
     inferno_m_firePositions = 0x1020;
     inferno_m_bFireIsBurning = 0x1620;
     inferno_m_fireCount = 0x1960;
@@ -830,7 +715,7 @@ static bool TryApplyFromDump(const std::string& offsetsContent, const std::strin
     if (!c4_m_bBombDefused) c4_m_bBombDefused = 0x11F4;
     if (!m_fFlags) m_fFlags = 0x3F4;
     if (!m_hOwnerEntity) m_hOwnerEntity = 0x520;
-    /** Controller meta (client_dll snapshot; web yoksa). */
+    
     if (!m_steamID) m_steamID = 0x780;
     if (!m_iCompetitiveRanking) m_iCompetitiveRanking = 0x888;
     if (!m_iCompetitiveWins) m_iCompetitiveWins = 0x88C;
@@ -863,7 +748,7 @@ static bool TryApplyFromDump(const std::string& offsetsContent, const std::strin
     if (t_inferno_pos) inferno_m_firePositions = t_inferno_pos;
     if (t_inferno_burn) inferno_m_bFireIsBurning = t_inferno_burn;
     if (t_inferno_eff) inferno_m_nFireEffectTickBegin = t_inferno_eff;
-    /* Molotov hull: yanlis siniftaki m_fireCount yakalanmasini ez */
+    
     TryApplyInfernoOffsetsFromClassBlock(clientContent);
     TryApplyEconEntityOffsetsFromClassBlock(clientContent);
     TryApplyVoteControllerOffsetsFromClassBlock(clientContent);
@@ -945,26 +830,4 @@ bool ExpectionalLoadOffsetsFromLocalFiles()
 
 	return false;
 }
-
-bool ExpectionalLoadOffsetsFromWeb()
-{
-	std::string offsetsContent;
-	std::string clientContent;
-
-	if (HttpGetExpectionalDev(L"/download/offsets.hpp", offsetsContent) &&
-	    HttpGetExpectionalDev(L"/download/client_dll.hpp", clientContent) &&
-	    TryApplyFromDump(offsetsContent, clientContent, "expectional.dev")) {
-		printf("[offsets] OK: Loaded from expectional.dev\n");
-		return true;
-	}
-
-	printf("[offsets] FAILED: Could not load offsets from expectional.dev\n");
-	return false;
-}
-
-/*
- * Offset kaynaklari (oncelik sirasi ExpectionalLoadOffsetsFromWeb icinde):
- *   https://expectional.dev/download/offsets.hpp
- *   https://expectional.dev/download/client_dll.hpp
- * Yedek: Valorant\\offsets\\ -> offsets_embed.rc (RCDATA)
- */
+

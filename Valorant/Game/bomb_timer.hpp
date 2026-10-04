@@ -84,11 +84,6 @@ inline int64_t NowMs() {
 	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-/**
- * Toggle: Settings::misc::bombTimer
- * Gorunurluk: (menu acik) VEYA (bomba kurulu). Menu acik + kurulu degil -> "C4 not planted".
- * Menu kapali + kurulu degil -> pencere yok.
- */
 inline void draw_window() {
 	static bool s_wasPlanted = false;
 	static int64_t s_plantWallMs = 0;
@@ -101,7 +96,6 @@ inline void draw_window() {
 		return;
 	}
 
-	/** Kurulu bomba: save_fps poll atlanir — sayac her kare guncellenir. */
 	bool plantedNow = false;
 	if (offsets::dwPlantedC4)
 		plantedNow = g_GameMem.readv<bool>(client + static_cast<uintptr_t>(offsets::dwPlantedC4) - 8);
@@ -162,7 +156,6 @@ inline void draw_window() {
 		return;
 	}
 
-
 	float remaining = s_ui.remaining;
 	if (remaining <= 0.f && s_plantWallMs > 0)
 		remaining = (40000.f - static_cast<float>(tms - s_plantWallMs)) / 1000.f;
@@ -191,4 +184,4 @@ inline void draw_window() {
 	ImGui::End();
 }
 
-} // namespace bomb_timer
+} 

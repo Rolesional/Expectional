@@ -37,20 +37,20 @@
 #include "expectional_winio.hpp"
 
 static std::string g_last_key;
-/** Bu harita adi icin overhead arandi ve bulunamadi: 12 sn boyunca tekrar VPK/disk tarama yok. */
+
 struct AbandonInfo {
 	DWORD last_tick;
 	int attempts;
 };
 static std::unordered_map<std::string, AbandonInfo> g_maptex_abandoned_keys;
-/** Bir harita icin yalnizca TEK seferlik VPK taramasi; basarisiz olursa harita degisene kadar bir daha denenmez. */
-static constexpr DWORD kRadarRetryMs = 0xFFFFFFFF; // Wait forever, do not retry
+
+static constexpr DWORD kRadarRetryMs = 0xFFFFFFFF; 
 static constexpr int kRadarMaxHeavyAttempts = 1;
 
-static void DebugRadarLog(const char* /*line*/) {
-	/** Radar log'lari kapali; teshis gerekirse OutputDebugStringA satirini geri ac. */
+static void DebugRadarLog(const char* ) {
+	
 }
-/** Workshop konteynerleri listesi process omru icinde sabit kabul edilir — bir kez tara. */
+
 static std::vector<std::string> g_workshop_container_cache;
 static bool g_workshop_container_cache_built = false;
 static const std::vector<std::string>& WorkshopContainerCache() {
@@ -61,7 +61,6 @@ static const std::vector<std::string>& WorkshopContainerCache() {
 	return g_workshop_container_cache;
 }
 
-/** Bir konteynerin `maps/*.vpk` icerigi: ad listesi. Sadece ad eslesirse acariz; donmayi kaldirir. */
 struct ContainerIndex {
 	std::string path;
 	std::vector<std::string> inner_map_names_lower;
@@ -115,7 +114,6 @@ static bool ModuleExePath(const wchar_t* module_name, std::wstring& out) {
 	return ok;
 }
 
-/** Toolhelp bazen engellenir; Psapi ile ayni PID uzerinde dene. */
 static bool ModuleExePathPsapi(const wchar_t* module_name, std::wstring& out) {
 	out.clear();
 	if (!processid || !module_name)
@@ -195,7 +193,6 @@ static bool SteamPathToCsgoRoot(std::wstring& out_csgo) {
 	return false;
 }
 
-/** `...\game\csgo\bin\win64\client.dll` -> `...\game\csgo` */
 static bool CsgoRootFromClientDll(const std::wstring& client_dll, std::wstring& out_csgo) {
 	out_csgo.clear();
 	if (client_dll.size() < 16)
@@ -215,7 +212,6 @@ static bool CsgoRootFromClientDll(const std::wstring& client_dll, std::wstring& 
 	return !out_csgo.empty();
 }
 
-/** `...\game\bin\win64\cs2.exe` -> `...\game\csgo` */
 static bool CsgoRootFromCs2Exe(const std::wstring& cs2_exe, std::wstring& out_csgo) {
 	out_csgo.clear();
 	if (cs2_exe.size() < 12)
@@ -269,7 +265,6 @@ static void StrToLowerAscii(std::string& s) {
 	}
 }
 
-/** `de_dust2_2017` -> `de_dust2_2017`, `de_dust2`; `mg_de_mirage` icin sona `de_mirage` (VPK/disk yedek). */
 static void AppendRadarKeyVariantsLower(const std::string& key_lower, std::vector<std::string>& out) {
 	out.clear();
 	if (key_lower.empty())
@@ -346,7 +341,6 @@ static void VpkPathToNameExtLower(const std::string& path, std::string& name_low
 	StrToLowerAscii(ext_lower);
 }
 
-/** Konteyner index: her workshop `<addonid>.vpk` icin `maps/*.vpk` ad listesi (yalnizca isim, header taramasi YOK). */
 static const std::vector<ContainerIndex>& BuildContainerIndex() {
 	if (g_container_index_built)
 		return g_container_index;
@@ -376,11 +370,10 @@ static bool ContainerInnerMatch(const ContainerIndex& ci, const std::vector<std:
 	return false;
 }
 
-/** Lower tier = better. `vtex_c` must include `_radar` in the basename. */
 static int RadarAssetTier(const std::string& name_lower, const std::string& ext_lower) {
 	if (ext_lower == "vtex_c") {
 		if (name_lower.find("_radar") == std::string::npos)
-			/** Workshop: bazen overhead klasorunde `_radar` yok; map VPK icinde yine de tek minimap olabilir. */
+			
 			return 35;
 		if (name_lower.find("_radar_psd") != std::string::npos)
 			return 0;
@@ -393,7 +386,6 @@ static int RadarAssetTier(const std::string& name_lower, const std::string& ext_
 	return 99;
 }
 
-/** `vpk::VPKDir` + vpk-parser tier: en iyi overhead radar yolu (VPK ic anahtar kucuk harf). */
 static bool FindBestOverheadRadarInVpk(vpk::VPKDir& dir, const std::string& map_key_lower, std::string& out_path,
 	std::string& out_ext_lower) {
 	out_path.clear();
@@ -438,7 +430,6 @@ static bool FindBestOverheadRadarInVpk(vpk::VPKDir& dir, const std::string& map_
 	return true;
 }
 
-/** Map adi dosya yolunda yoksa (workshop remap): yalnizca tier — yalnizca `mapvpk` / workshop VPK icin. */
 static bool FindUnkeyedOverheadRadarInVpk(vpk::VPKDir& dir, std::string& out_path, std::string& out_ext_lower) {
 	out_path.clear();
 	out_ext_lower.clear();
@@ -527,7 +518,6 @@ static bool TryWorkshopRadarVpkOpen(vpk::VPKDir& dir, const std::string& map_key
 	return false;
 }
 
-/** @return 0 yok, 1 `pixels` doldu, 2 `g_srv` olustu (vtex). `allow_unkeyed_fallback`: yalnizca tek-harita VPK (workshop / maps/*.vpk). */
 static int TryVpkRadarPayload(vpk::VPKDir& dir, const std::string& key, bool allow_unkeyed_fallback,
 	std::string& maptex_fail_detail, stbi_uc*& pixels, int& iw, int& ih, int& comp, int* out_vtex_w, int* out_vtex_h) {
 	std::string vpk_path, ext_l;
@@ -642,32 +632,21 @@ bool WindowRadarMapTex_Tick(const char* panorama_map_id_utf8) {
 	if (key == g_last_key && g_srv)
 		return true;
 
-	/*
-	static std::string s_deferred_parse_key;
-	if (s_deferred_parse_key != key) {
-		s_deferred_parse_key = key;
-		return false;
-	}
-	s_deferred_parse_key.clear();
-	*/
 	{
 		const DWORD now = GetTickCount();
 		const auto it = g_maptex_abandoned_keys.find(key);
 		if (it != g_maptex_abandoned_keys.end()) {
-			/** Tek-atislik politika: ilk basarisiz denemenden sonra harita degisene kadar yeniden taramak yok. */
+			
 			it->second.last_tick = now;
 			return false;
 		}
 	}
-	/** Eski SRV'yi hemen serbest birakma — yeni harita texture'i bulunana kadar onu cizmeye devam et,
-	 *  yoksa tarama suresince overlay'de bos kare gozukur (overlay 'gidip geliyor' algisi). */
-
+	
 	std::wstring csgo;
 	if (!ResolveCsgoRoot(csgo)) {
 		return false;
 	}
 
-	/** Diskten stock dosyalar yalniz `key` ile aransin — `de_nuke_xxx` → `de_nuke` yanlis stock PNG'yi getirmesin. */
 	std::vector<std::string> disk_try_keys{key};
 
 	std::string maptex_fail_detail;
@@ -750,7 +729,7 @@ bool WindowRadarMapTex_Tick(const char* panorama_map_id_utf8) {
 	if (!pixels) {
 		std::vector<std::string> vpk_try_keys;
 		AppendRadarKeyVariantsLower(key, vpk_try_keys);
-		/** Stock pak01 sadece tam ad ile arasin (workshop adi parent `de_nuke`'a duserse stock Nuke radarini almasin). */
+		
 		const std::vector<std::string> stock_try_keys{key};
 		auto attempt_vpk = [&](vpk::VPKDir& dir, bool opened, bool allow_unkeyed,
 			const std::vector<std::string>& try_keys) -> bool {
@@ -782,7 +761,7 @@ bool WindowRadarMapTex_Tick(const char* panorama_map_id_utf8) {
 		vpk::VPKDir mapvpk;
 		if (!pixels && attempt_vpk(mapvpk, TryOpenGameMapVpk(mapvpk, csgo, key), true, vpk_try_keys))
 			return true;
-		/** Agir workshop tarama: bir key icin yalnizca ilk N denemede yapilir. */
+		
 		int prev_attempts = 0;
 		{
 			const auto it = g_maptex_abandoned_keys.find(key);
@@ -795,7 +774,7 @@ bool WindowRadarMapTex_Tick(const char* panorama_map_id_utf8) {
 			&& attempt_vpk(ws, TryWorkshopRadarVpkOpen(ws, key), true, vpk_try_keys))
 			return true;
 		if (allow_heavy_workshop && !pixels) {
-			/** Konteyner index ile yalnizca `maps/<key|variant>.vpk` icerigine sahip konteynerleri ac. */
+			
 			bool workshop_nested_png = false;
 			for (const ContainerIndex& ci : BuildContainerIndex()) {
 				if (workshop_nested_png || pixels)
@@ -832,7 +811,7 @@ bool WindowRadarMapTex_Tick(const char* panorama_map_id_utf8) {
 						workshop_nested_png = true;
 						break;
 					}
-					/** Bir kademe daha derinde gomulu VPK olabilir — yine ad uyan payload'lara odaklan. */
+					
 					for (const auto& deeper : ws.list_files("", ".vpk")) {
 						std::string dnm, dext;
 						VpkPathToNameExtLower(deeper, dnm, dext);
@@ -935,11 +914,9 @@ void WindowRadarMapTex_DrawUnderBlips(ImDrawList* dl, const ImVec2& rmin, const 
 			dl->AddImage(reinterpret_cast<ImTextureID>(g_srv), rmin, rmax, uv0, uv1, IM_COL32_WHITE);
 			return;
 		}
-		/** CS2 yaw (XY, +X ileri) ile overhead 'kuzey yukari' arasi 90° offset + screen y ters. */
+		
 		const float map_rot_yaw = view_yaw_deg - 90.f;
-		/** Pencere kare, 45°'de kose-kose mesafesi `w*sqrt(2)`. Donerken hem quad'i hem UV penceresini sqrt(2)
-		 *  buyutursek pencere her acida tamamen dolar (bosluk yok) ve UV kayitsiz oranda buyudugu icin texture
-		 *  ayni piksel olceginde kalir (tekrar/edge smear yok, sadece player etrafinda biraz daha cok map gorunur). */
+		
 		const float kCoverage = 1.4143f;
 		const float half_dx = (rmax.x - rmin.x) * 0.5f * kCoverage;
 		const float half_dy = (rmax.y - rmin.y) * 0.5f * kCoverage;
@@ -949,8 +926,7 @@ void WindowRadarMapTex_DrawUnderBlips(ImDrawList* dl, const ImVec2& rmin, const 
 		const float uv_cy = (uv0.y + uv1.y) * 0.5f;
 		const float uv_hx = (uv1.x - uv0.x) * 0.5f * kCoverage;
 		const float uv_hy = (uv1.y - uv0.y) * 0.5f * kCoverage;
-		/** UV [0,1] disina cikabilir; clip rect bu fazlaligi keser, blip senkronu icin pencere icinde orijinal
-		 *  uv0/uv1 hizalamasi korunur. Clamp ETMIYORUZ — clamp asimetri yaratiyor ve blip pozisyonlarini bozuyor. */
+		
 		ImVec2 eUv0(uv_cx - uv_hx, uv_cy - uv_hy);
 		ImVec2 eUv1(uv_cx + uv_hx, uv_cy + uv_hy);
 		ImVec2 p1(q_min.x, q_min.y), p2(q_max.x, q_min.y), p3(q_max.x, q_max.y), p4(q_min.x, q_max.y);
@@ -1001,7 +977,6 @@ struct OverviewParsed {
 };
 static std::unordered_map<std::string, OverviewParsed> g_overview_cache;
 
-/** KV1 (`"pos_x" "..."`) + KV3 (`pos_x = ...`) destegi: sayisal degeri tirnakli/tirnaksiz oku. */
 static bool ParseOverviewKV(const std::string& text, double& px, double& py, double& sc) {
 	bool gx = false, gy = false, gs = false;
 	const char* keys[3] = {"pos_x", "pos_y", "scale"};
@@ -1024,14 +999,12 @@ static bool ParseOverviewKV(const std::string& text, double& px, double& py, dou
 				p = kend;
 				continue;
 			}
-			/** Anahtardan sonra: bosluk/`=`/`:`/`"`/`'` karakterlerinin TAMAMINI atla. KV1'de key kapanis tirnagi ve
-			 *  hemen ardindaki deger acilis tirnagi tek tek atlanmali; yoksa parser degerin '"' ini "deger basladi"
-			 *  saniyor ve ardinda bosluk gorunce vazgeciyor. */
+			
 			size_t q = kend;
 			while (q < text.size() && (text[q] == ' ' || text[q] == '\t' || text[q] == '=' || text[q] == ':'
 										|| text[q] == '\r' || text[q] == '\n' || text[q] == '"' || text[q] == '\''))
 				++q;
-			/** Sayisal token (negatif, ondalik, bilimsel). */
+			
 			size_t s = q;
 			while (s < text.size()) {
 				const char c = text[s];
@@ -1054,7 +1027,7 @@ static bool ParseOverviewKV(const std::string& text, double& px, double& py, dou
 }
 
 static bool ReadOverviewTxtFromVpk(vpk::VPKDir& dir, const std::vector<std::string>& try_keys, std::string& out_text) {
-	/** CS2 overview .txt iki yerde olabilir: stock'ta `resource/overviews/`, workshop'ta `maps/`. */
+	
 	const char* prefixes[] = {"resource/overviews/", "maps/"};
 	for (const char* pre : prefixes) {
 		for (const std::string& k : try_keys) {
@@ -1122,7 +1095,7 @@ bool WindowRadarMapTex_QueryOverview(const char* panorama_map_id_utf8, double& o
 			out_scale = it->second.scale;
 			return true;
 		}
-		/** Tek-atislik: bir kez denendi, basarisiz. Harita degisene kadar tekrar tarama yok. */
+		
 		if (it->second.tried)
 			return false;
 	}
@@ -1137,11 +1110,11 @@ bool WindowRadarMapTex_QueryOverview(const char* panorama_map_id_utf8, double& o
 
 	std::vector<std::string> try_keys;
 	AppendRadarKeyVariantsLower(key, try_keys);
-	/** Stock dosya icin variant kullanma — yanlis parent (`de_nuke`) eslesmesin. */
+	
 	const std::vector<std::string> stock_keys{key};
 
 	std::string txt;
-	std::string parse_src; /** son parse denemesinin kaynagi (log icin) */
+	std::string parse_src; 
 	auto try_parse = [&](const std::string& s, const char* src) -> bool {
 		double px = 0.0, py = 0.0, sc = 0.0;
 		if (!ParseOverviewKV(s, px, py, sc)) {
@@ -1149,7 +1122,7 @@ bool WindowRadarMapTex_QueryOverview(const char* panorama_map_id_utf8, double& o
 			_snprintf_s(log, _TRUNCATE, "parse-fail src=%s key='%s' bytes=%zu (pos_x/pos_y/scale eslesmedi)",
 				src, key.c_str(), s.size());
 			DebugRadarLog(log);
-			/** Dosya icerigini text-ascii olarak doku (CRLF -> ' '). KV3 binary ise garip karakterler gelir. */
+			
 			std::string preview;
 			preview.reserve((std::min)(s.size(), size_t{384}));
 			for (size_t i = 0; i < s.size() && preview.size() < 384; ++i) {
@@ -1212,7 +1185,7 @@ bool WindowRadarMapTex_QueryOverview(const char* panorama_map_id_utf8, double& o
 			&& try_parse(txt, "workshop-direct"))
 			return true;
 	}
-	/** Workshop konteyneri index: sadece ad eslesen konteyneri ac, hicbiri eslesmiyorsa hic acma. */
+	
 	int containers_scanned = 0;
 	for (const ContainerIndex& ci : BuildContainerIndex()) {
 		if (!ContainerInnerMatch(ci, try_keys))
@@ -1226,7 +1199,7 @@ bool WindowRadarMapTex_QueryOverview(const char* panorama_map_id_utf8, double& o
 		vpk::VPKDir cont;
 		if (!cont.open(ci.path))
 			continue;
-		/** Cogu workshop addon'u overview .txt'i `maps/<map>.txt` olarak dis konteynerde tutar. */
+		
 		if (ReadOverviewTxtFromVpk(cont, try_keys, txt) && try_parse(txt, "ws-container-outer"))
 			return true;
 		for (const auto& mf : cont.list_files("maps/", ".vpk")) {

@@ -114,7 +114,6 @@ inline bool ReadAllBytesUtf8(const std::string& pathUtf8, std::vector<uint8_t>& 
 	return ReadAllBytesWide(w, out);
 }
 
-/** FindFirstFileA / registry yolları — CP_ACP, slash normalize. VPK + Steam dosyalari icin. */
 inline bool ReadAllBytesPathA(const std::string& pathA, std::vector<uint8_t>& out)
 {
 	return ReadAllBytesWide(AnsiPathToWide(pathA), out);
@@ -214,4 +213,4 @@ inline void ForEachSubdirWide(const std::wstring& root, const FileVisitFn& visit
 	FindClose(hFind);
 }
 
-}  // namespace ExpectionalWinIO
+}  

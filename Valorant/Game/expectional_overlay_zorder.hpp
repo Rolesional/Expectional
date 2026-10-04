@@ -1,5 +1,4 @@
 #pragma once
-/** UC #229070 overlay z-order — TOPMOST yok; launcher broker + DLL. */
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -64,7 +63,6 @@ inline DWORD FindCs2ProcessId() noexcept
 #endif
 }
 
-/** cs2.exe PID ile ilk bulunan HWND — eskisurum get_process_wnd (title/class yok). */
 inline HWND GetProcessWnd(DWORD pid) noexcept
 {
 	if (!pid)
@@ -167,7 +165,7 @@ inline bool IsGameTargetReady(HWND game_root) noexcept
 
 inline bool TryMatchWindowBand(HWND overlay, HWND game_root, ZOrderCache& cache) noexcept
 {
-	/** Her kare band eslestirmeyi dene — UWP'de ilk denemede basarisiz olabilir. */
+	
 	if (!overlay || !game_root || !IsWindow(overlay) || !IsWindow(game_root))
 		return false;
 
@@ -214,7 +212,6 @@ inline void SyncOverlayBoundsFromClient(HWND overlay, HWND game_hwnd) noexcept
 	(void)SetWindowPos(overlay, nullptr, xy.x, xy.y, w, h, SWP_NOREDRAW | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
-/** eskisurum main.cpp main_loop — oyun odaktayken GW_HWNDPREV (TOPMOST yok). */
 inline void StackOverlayEskisurum(HWND overlay, HWND game_hwnd) noexcept
 {
 	if (!overlay || !IsWindow(overlay) || !game_hwnd || !IsWindow(game_hwnd))
@@ -230,7 +227,7 @@ inline void StackOverlayEskisurum(HWND overlay, HWND game_hwnd) noexcept
 	(void)SetWindowPos(overlay, insert, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 
-inline void ApplyOverlayZOrder(HWND overlay, HWND game_hwnd, HWND /*game_root*/, bool /*force*/, ZOrderCache& cache) noexcept
+inline void ApplyOverlayZOrder(HWND overlay, HWND game_hwnd, HWND , bool , ZOrderCache& cache) noexcept
 {
 	(void)cache;
 	if (!overlay || !IsWindow(overlay) || !game_hwnd || !IsWindow(game_hwnd))
@@ -239,7 +236,6 @@ inline void ApplyOverlayZOrder(HWND overlay, HWND game_hwnd, HWND /*game_root*/,
 	(void)ShowWindow(overlay, SW_SHOWNOACTIVATE);
 	StackOverlayEskisurum(overlay, game_hwnd);
 
-	/** UWP yedek: admin broker SetWindowBand deneyebilir. */
 	HWND game_root = ResolveGameRoot(game_hwnd);
 	if (game_root && IsWindow(game_root) && !cache.band_matched)
 		(void)TryMatchWindowBand(overlay, game_root, cache);
@@ -318,4 +314,4 @@ inline void PublishIpc(Ipc& ipc, HWND overlay, HWND game_hwnd, HWND game_root, b
 		InterlockedIncrement(&ipc.shared->seq);
 }
 
-} // namespace ExpectionalOverlayZOrder
+} 

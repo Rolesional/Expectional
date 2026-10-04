@@ -1,5 +1,5 @@
 #pragma once
-/** CS2 silah / bomb ikon TTF (Catalyst resources::fonts::weapons ile ayni). */
+
 namespace expectional_weapons_font {
 
 	inline unsigned char weapons[ 59028 ]
@@ -4925,4 +4925,4 @@ namespace expectional_weapons_font {
 		0xE1, 0x65, 0x7D, 0x83, 0x00, 0x00, 0x00, 0x00, 0xE1, 0x84, 0xEF, 0x8C
 	};
 
-} // namespace expectional_weapons_font
+} 

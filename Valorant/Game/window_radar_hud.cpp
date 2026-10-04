@@ -19,13 +19,11 @@
 namespace external_hud_radar {
 namespace {
 
-/** CHud icindeki eleman listesi — oyun guncellemesinde kayabilir. */
 constexpr std::uintptr_t kHudElementCountOff = 0x264;
 constexpr std::uintptr_t kHudElementDataOff = 0x268;
 constexpr std::size_t kHudElementStride = 0x18;
 constexpr std::intptr_t kHudRadarBaseDelta = -32;
 
-/** CCSGO_HudRadar ic gorunumu — kaynak: dis HUD radar ornekleri; dogrulanmali. */
 constexpr std::uintptr_t kRadarIsRound = 0x60;
 constexpr std::uintptr_t kRadarMapTexPos = 0x190;
 constexpr std::uintptr_t kRadarVisMax = 0x19C;
@@ -211,7 +209,7 @@ static bool ReadPlantedBombWorld(UE4Structs::Vector3& out) {
 	return true;
 }
 
-} // namespace (detail)
+} 
 
 bool TickFromMemory() {
 	const std::uintptr_t chud = ResolveCHudPointer();
@@ -237,15 +235,14 @@ bool TryDrawFrame(ImDrawList* dl, const ImVec2& rmin, const ImVec2& rmax, float 
 		std::lock_guard<std::mutex> lk(g_PlayerListMutex);
 		snapshot = UE4Structs::PlayerList;
 	}
-	/** HUD durumu, liste kopyalandiktan hemen sonra (oyuncu pozisyonlari ile ayni frame'e yakin). */
+	
 	if (!TickFromMemory())
 		return false;
 
-	/** Convar yok: 1.0 (ICvar ile hud_scaling / cl_hud_radar_scale okunursa gercek minimap px ile oturur). */
 	const float hud_scaling = 1.f;
 	const float cl_hud_radar_scale = 1.f;
 	const float radar_hud_scaling = cl_hud_radar_scale * hud_scaling;
-	/** CS2 dis HUD ornegi: `radar_size = 290 * scale`, sol-ust padding safezone + hud_padding. */
+	
 	const ImGuiIO& io = ImGui::GetIO();
 	const float screen_w = (std::max)(320.f, io.DisplaySize.x);
 	const float screen_h = (std::max)(240.f, io.DisplaySize.y);
@@ -260,7 +257,6 @@ bool TryDrawFrame(ImDrawList* dl, const ImVec2& rmin, const ImVec2& rmax, float 
 	const float ref_left = ref_cx - radar_size * 0.5f;
 	const float ref_top = ref_cy - radar_size * 0.5f;
 
-	/** Oyun minimapi kare; ImGui dikdortgeninde ic ice kare — u,v bu kareye maplenir (4:3 kayma azalir). */
 	const float side = (std::min)(mapW, mapH);
 	const float ox = rmin.x + (mapW - side) * 0.5f;
 	const float oy = rmin.y + (mapH - side) * 0.5f;
@@ -300,7 +296,7 @@ bool TryDrawFrame(ImDrawList* dl, const ImVec2& rmin, const ImVec2& rmax, float 
 		bool oob = false;
 		ImVec2 pos{};
 		TranslateToRadar(world, yaw, radar_to_texture_scale, pos, &oob);
-		/** Referans: sx_screen = ref_cx + pos.x * radar_hud_scaling; pencere icine ref karesinden u,v ile aktar. */
+		
 		const float sx_ref = ref_cx + pos.x * radar_hud_scaling;
 		const float sy_ref = ref_cy + pos.y * radar_hud_scaling;
 		const float u = (sx_ref - ref_left) / (std::max)(radar_size, 1.f);
@@ -380,4 +376,4 @@ bool TryDrawFrame(ImDrawList* dl, const ImVec2& rmin, const ImVec2& rmax, float 
 	return true;
 }
 
-} // namespace external_hud_radar
+} 

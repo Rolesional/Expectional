@@ -87,12 +87,11 @@
     <IncludePath>C:\Users\GameX\Downloads\roleswarekernel %281%29xdsr\cs2_usermode\Includes;..\Includes\Direct3d;$(IncludePath)</IncludePath>
     <LibraryPath>..\Includes\Direct3d;$(LibraryPath)</LibraryPath>
     <TargetName>Expectional</TargetName>
-    <!-- VxLang: false = markers stripped at compile (no VM/obf SDK calls); Obscurion cannot virtualize marked ranges.
-         PERFORMANCE BUILD: KAPALI tutulur. true yapilirsa /Ob0 + /GL- + LTCG kapanir + vxlib runtime calisir => FPS dusurur. -->
+    
     <EnableVxLang>false</EnableVxLang>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' And '$(EnableVxLang)'=='true'">
-    <!-- VxLang SDK: WPO/LTCG merges marker sites; protector verifier then reports orphan VxObfuscationBegin. -->
+    
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -206,7 +205,6 @@
     <ClCompile Include="Overlay\menu_config_globals.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Protection\vxlang_hooks.cpp" />
-    <ClCompile Include="Protection\lic_auth_vm.cpp" />
     <ClCompile Include="Driver\driver.cpp">
       <PreprocessorDefinitions>EXPECTIONAL_USE_R69;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -284,15 +282,6 @@
     <ClCompile Include="OSImGui\os_imgui_menu_fonts.cpp" />
     <ClCompile Include="OSImGui\os_imgui_menu_widgets.cpp" />
     <ClCompile Include="OSImGui\imgui_edited.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_crypto.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_hwid.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_antidebug.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_ws.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_tcp.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_report.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_login_ui.cpp" />
-    <ClCompile Include="LicenseGuard\src\lic_wire.cpp" />
-    <ClCompile Include="LicenseGuard\src\LicenseGuard.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Includes\Imgui\imconfig.h" />
@@ -349,17 +338,6 @@
     <ClInclude Include="Overlay\shade_gui.hpp" />
     <ClInclude Include="Overlay\shade_menu_config_stub.hpp" />
     <ClInclude Include="Overlay\render.hpp" />
-    <ClInclude Include="LicenseGuard\include\LicenseGuard.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_xor.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_json.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_crypto.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_hwid.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_antidebug.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_ws.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_tcp.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_report.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_login_ui.hpp" />
-    <ClInclude Include="LicenseGuard\include\lic_wire.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="offsets_embed.rc" />

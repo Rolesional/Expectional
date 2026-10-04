@@ -17,10 +17,6 @@ inline bool UserLocalAppDataWide(std::wstring& out)
 	return true;
 }
 
-/**
- * UWP Notepad inject sonrasi DLL'in CSIDL_LOCAL_APPDATA + Expectional\\configs
- * ile gordugu klasorun launcher tarafindaki tam yolu.
- */
 inline std::wstring TrueUserLocalAppDataWide()
 {
 	wchar_t buf[MAX_PATH]{};
@@ -108,4 +104,4 @@ inline std::wstring UserDocumentsLineupsDirWide()
 	return std::wstring(profile) + L"\\Documents\\Expectional\\lineups";
 }
 
-}  // namespace ExpectionalPaths
+}  

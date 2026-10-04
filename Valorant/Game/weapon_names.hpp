@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <cstring>
 
-/** ananbaban-stable Entity.cpp weapon index tablosu (kisaltildi). */
 inline const char* WeaponNameFromDefIndex(uint16_t id) {
 	switch (id) {
 	case 1: return "deagle";
@@ -74,7 +73,6 @@ inline const char* WeaponNameFromDefIndex(uint16_t id) {
 	}
 }
 
-/** CCSWeaponBaseVData::m_szName ("weapon_usp_silencer") -> item def index. */
 inline uint16_t DefIndexFromWeaponClassName(const char* raw) {
 	if (!raw || !raw[0])
 		return 0;
@@ -128,7 +126,6 @@ inline uint16_t DefIndexFromWeaponClassName(const char* raw) {
 	return 0;
 }
 
-/** HUD / buy menu English name. Internal key (usp, push) stays for combat categories. */
 inline const char* WeaponDisplayNameFromKey(const char* key) {
 	if (!key || !key[0])
 		return nullptr;
@@ -164,7 +161,6 @@ inline const char* WeaponDisplayNameFromKey(const char* key) {
 	return key;
 }
 
-/** ESP'de kod adi yazilan bicaklar (push, karambit, ...). */
 inline bool IsKnifeCodeName(const char* name) {
 	if (!name || !name[0])
 		return false;

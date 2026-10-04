@@ -125,7 +125,7 @@ void ExpectionalShellOpenUtf8Path(const char* utf8_path) {
 	const std::wstring w = Utf8PathToWide(std::string(utf8_path));
 	if (w.empty())
 		return;
-	/** "open" ile Windows varsayilan iliskilendirmesini kullanir (klasor = Explorer, .txt = editor). */
+	
 	ShellExecuteW(nullptr, L"open", w.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 }
 
@@ -215,7 +215,6 @@ static fs::path PathForName(const char* name_no_ext) {
 	return ConfigDirPath() / (Utf8PathToWide(n) + L".cfg");
 }
 
-/** Load: in-process config dir, sonra global + UWP bridge fallback. */
 static fs::path ResolveConfigFilePath(const char* name_no_ext)
 {
 	const fs::path primary = PathForName(name_no_ext);
@@ -440,7 +439,6 @@ bool ExpectionalConfigSave(const char* name_no_ext) {
 	f << "misc.cloudRadarPublishUrl=" << Settings::misc::cloudRadarPublishUrl << '\n';
 	f << "misc.cloudRadarViewerBase=" << Settings::misc::cloudRadarViewerBase << '\n';
 
-	/** Aktif grenade lineup paketleri — birden cok satir yazilir, her satir tek pack_id (tam yol). */
 	{
 		const std::vector<std::string> active_ids = ExpectionalLineupBrowserActiveIdsSnapshot();
 		for (const std::string& id : active_ids) {
@@ -684,7 +682,7 @@ static void ApplyKeyVal(const std::string& key, const std::string& val) {
 	else if (key == "misc.cloudRadar") Settings::misc::cloudRadar = ParseBool(val);
 	else if (key == "misc.radarWindow") Settings::misc::radarWindow = ParseBool(val);
 	else if (key == "misc.radarWindowDebugLog") Settings::misc::radarWindowDebugLog = ParseBool(val);
-	else if (key == "misc.radarWindow43") { /* menu kapali: config'ten okunmaz, her zaman kare */ }
+	else if (key == "misc.radarWindow43") {  }
 	else if (key == "misc.radarWindowMapPx") Settings::misc::radarWindowMapPx = std::stof(val);
 	else if (key == "misc.radarWindowFollowLocal") Settings::misc::radarWindowFollowLocal = ParseBool(val);
 	else if (key == "misc.radarWindowFollowZoom") Settings::misc::radarWindowFollowZoom = std::stof(val);
@@ -696,7 +694,7 @@ static void ApplyKeyVal(const std::string& key, const std::string& val) {
 	else if (key == "misc.radarWindowTransparency") Settings::misc::radarWindowTransparency = std::clamp(std::stoi(val), 0, 100);
 	else if (key == "misc.rank_reveal_window") Settings::misc::rank_reveal_window = ParseBool(val);
 	else if (key == "misc.rank_reveal_inventory_enabled") Settings::misc::rank_reveal_inventory_enabled = ParseBool(val);
-	else if (key == "misc.votekick_reveal_window") { /* disabled — menu removed */ }
+	else if (key == "misc.votekick_reveal_window") {  }
 	else if (key == "misc.debug_visible_check") Settings::misc::debug_visible_check = ParseBool(val);
 	else if (key == "misc.autosave_config") Settings::misc::autosave_config = ParseBool(val);
 	else if (key == "misc.obsBypass") Settings::misc::obsBypass = ParseBool(val);
@@ -705,7 +703,7 @@ static void ApplyKeyVal(const std::string& key, const std::string& val) {
 		const int parsed = std::stoi(val);
 		Settings::misc::overlayCustomFpsValue = parsed < 60 ? 60 : parsed;
 	}
-	else if (key == "misc.workerQuality") { /* sabit hale getirildi — config'ten yuklenmiyor */ }
+	else if (key == "misc.workerQuality") {  }
 	else if (key == "lineups.active_pack") ExpectionalLineupBrowserActiveAdd(val);
 	else if (key == "misc.cloudRadarPublishUrl") SetCStr(Settings::misc::cloudRadarPublishUrl, sizeof Settings::misc::cloudRadarPublishUrl, val);
 	else if (key == "misc.cloudRadarViewerBase") SetCStr(Settings::misc::cloudRadarViewerBase, sizeof Settings::misc::cloudRadarViewerBase, val);
@@ -726,7 +724,7 @@ bool ExpectionalConfigLoad(const char* name_no_ext) {
 		return false;
 	std::istringstream f(body);
 	WeaponRuntime::ClearWeaponProfiles();
-	/** Eski aktif lineup paketlerini temizle — config'teki satirlar yeniden doldurur. */
+	
 	ExpectionalLineupBrowserClearActive();
 	std::string line;
 	while (std::getline(f, line)) {

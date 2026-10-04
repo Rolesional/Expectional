@@ -1,13 +1,4 @@
 #pragma once
-/**
- * .tri yukleyici — um/src/map_manager.cpp + p_reader.cpp ile ayni mantik:
- *   - kMapMeshFiles listesi (tanimsiz harita = tek deneme, sonra vazgec)
- *   - <exe>\maps\<meshFile>  (meshFile tablodan; genelde <map>.tri)
- *   - Basarisizlikta ayni harita icin tekrar dosya okuma / deneme YOK
- *   - Harita degisince yeniden dene
- *
- * Format: binary, basliksiz, 36 byte/ucgen = 3 x Vector3(float)
- */
 
 #include "catalyst_world_bvh.hpp"
 #include "globals.hpp"
@@ -28,7 +19,6 @@
 
 namespace tri_loader {
 
-// um map_manager.cpp ile ayni tablo (C# MapManager.MapMeshFiles)
 static const std::map<std::string, std::string> kMapMeshFiles = {
 	{ "de_dust2", "de_dust2.tri" },
 	{ "de_mirage", "de_mirage.tri" },
@@ -83,7 +73,6 @@ static std::string CleanMapName( std::string mapName )
 	return mapName;
 }
 
-/** Resmi / workshop tum map adlari: yol ayirici ve wildcards yok; uzunluk makul. */
 static bool MapBasenameOk( const std::string& test )
 {
 	if ( test.empty() || test.size() > 200 )
@@ -107,7 +96,6 @@ static std::string ExeDir()
 	return sl != std::string::npos ? p.substr( 0, sl + 1 ) : std::string{};
 }
 
-/** Engine / network client harita adi (radar ile ayni offsetler). */
 inline std::string ReadMapName()
 {
 	const std::uintptr_t eng = g_GameMem.engine_address();
@@ -148,7 +136,6 @@ inline std::string ReadMapName()
 	return {};
 }
 
-/** `%LOCALAPPDATA%\\Expectional\\maps` — yoksa olusturulur. */
 static std::filesystem::path LocalExpectionalMapsPath()
 {
 	const std::wstring dirW = ExpectionalPaths::GlobalMapsDirWide();
@@ -160,9 +147,7 @@ static std::filesystem::path LocalExpectionalMapsPath()
 
 static std::vector<ex_world_bvh::bvh::triangle> LoadTriFile( const std::filesystem::path& filePath )
 {
-	/** um PReader::LoadTriMesh: dosya = N x 36 bayt, sadece 3x Vector3 (surface yok).
-	 *  Bizim bvh::triangle ise ayrica surface_info tasir — dosyayi ham okuyup donusturuyoruz.
-	 */
+	
 #pragma pack( push, 1 )
 	struct TriRawUm {
 		float v0x, v0y, v0z;
@@ -197,14 +182,9 @@ static std::vector<ex_world_bvh::bvh::triangle> LoadTriFile( const std::filesyst
 	return out;
 }
 
-// ---------------------------------------------------------------------------
-// Durum (um: lastLoadedMap / useVisibilityCheck)
-// ---------------------------------------------------------------------------
 inline std::string g_last_loaded_map;
 inline std::string g_load_source;
-/** Sadece dosya yok / exe dizini yok / harita listede yok: bu haritada tekrar deneme yok.
- *  E:parse (bozuk .tri) aralikla yeniden okunur — dosya tamamlaninca yuklenir (ESP thread'ini kirpintilamaz).
- */
+
 inline std::string g_tri_gave_up_on_map;
 
 static constexpr std::size_t kMinLoadedTriangles = 256u;
@@ -225,9 +205,6 @@ static bool TryLoadTriFromPath(const std::filesystem::path& path,
 	return true;
 }
 
-// ---------------------------------------------------------------------------
-// BVH thread'den cagrılır — um UpdateMapDetection + LoadMapMesh eslenigi.
-// ---------------------------------------------------------------------------
 static bool TickFileLoader()
 {
 	if (g_GameMem.attached_pid == 0 || !client)
@@ -288,4 +265,4 @@ static bool TickFileLoader()
 	return true;
 }
 
-} // namespace tri_loader
+} 

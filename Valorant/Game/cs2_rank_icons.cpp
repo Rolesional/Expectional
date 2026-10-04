@@ -234,7 +234,7 @@ static void ReleaseAllSrvUnlocked()
 	}
 }
 
-} // namespace
+} 
 
 void ExpectionalRankIconsShutdown()
 {

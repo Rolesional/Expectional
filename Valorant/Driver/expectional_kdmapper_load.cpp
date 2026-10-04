@@ -194,7 +194,6 @@ static ExpectionalDriverMapResult ExpectionalMapKernelDriverInternal(bool force_
 		return result;
 	}
 
-	/** Map sonrasi hook: CR3 dolu olmali (PEB/base zorunlu degil). */
 	if (!ExpectionalProbeR69HookSelf()) {
 		if (ExpectionalKernelDriverListedByBaseName(ExpectionalKmDriverImageBaseName)) {
 			result.error =
@@ -217,7 +216,7 @@ static ExpectionalDriverMapResult ExpectionalMapKernelDriverInternal(bool force_
 #endif
 }
 
-} // namespace
+} 
 
 bool ExpectionalIsR69DriverHookActive()
 {
@@ -243,12 +242,12 @@ ExpectionalDriverMapResult ExpectionalMapKernelDriverForce()
 	return ExpectionalMapKernelDriverInternal(true, false);
 }
 
-ExpectionalDriverMapResult ExpectionalMapKernelDriverForGame(DWORD /*game_pid*/, bool force_remap)
+ExpectionalDriverMapResult ExpectionalMapKernelDriverForGame(DWORD , bool force_remap)
 {
 	return ExpectionalMapKernelDriverInternal(force_remap, false);
 }
 
-bool ExpectionalEnsureKernelDriverMapped(HWND owner, DWORD /*verify_pid*/)
+bool ExpectionalEnsureKernelDriverMapped(HWND owner, DWORD )
 {
 	ExpectionalDriverMapResult result = ExpectionalMapKernelDriverIfNeeded();
 	if (!result.success)
@@ -262,4 +261,3 @@ bool ExpectionalEnsureKernelDriverMapped(HWND owner, DWORD /*verify_pid*/)
 	MessageBoxW(owner, err.c_str(), L"Expectional", MB_OK | MB_ICONERROR);
 	return false;
 }
-

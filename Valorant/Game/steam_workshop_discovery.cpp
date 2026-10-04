@@ -57,14 +57,6 @@ static std::wstring Utf8ToWide(const std::string& s)
 	return w;
 }
 
-/**
- * libraryfolders.vdf'den "path" alanlarini cikarir.
- * Format ornegi:
- *   "libraryfolders" {
- *      "0" { "path" "C:\\Program Files (x86)\\Steam" ... }
- *      "1" { "path" "D:\\SteamLibrary" ... }
- *   }
- */
 static std::vector<std::wstring> ExtractPathsFromVdf(const std::string& text)
 {
 	std::vector<std::wstring> out;
@@ -78,7 +70,7 @@ static std::vector<std::wstring> ExtractPathsFromVdf(const std::string& text)
 		const size_t q2 = text.find('"', q1 + 1);
 		if (q2 == std::string::npos) break;
 		std::string val = text.substr(q1 + 1, q2 - q1 - 1);
-		/** VDF cift ters slash kullanir: "C:\\Program Files" → "C:\Program Files". */
+		
 		std::string unesc;
 		unesc.reserve(val.size());
 		for (size_t i = 0; i < val.size(); ++i) {
@@ -198,14 +190,12 @@ static std::vector<std::wstring> CollectAllSteamAppsDirs()
 	for (const std::wstring& steam : steam_roots)
 		AppendSteamAppsDir(steam, steamapps_dirs, seen_steamapps);
 
-	/** libraryfolders.vdf yeni kutuphaneler ekleyebilir; iki tur tara. */
 	const size_t initial = steamapps_dirs.size();
 	for (size_t i = 0; i < initial; ++i)
 		AppendLibraryPathsFromVdf(steamapps_dirs[i], steamapps_dirs, seen_steamapps);
 	for (size_t i = initial; i < steamapps_dirs.size(); ++i)
 		AppendLibraryPathsFromVdf(steamapps_dirs[i], steamapps_dirs, seen_steamapps);
 
-	/** Dogrudan workshop\content\730 olan steamapps koklerini de ekle. */
 	for (wchar_t dl = L'A'; dl <= L'Z'; ++dl) {
 		wchar_t root_path[] = { dl, L':', L'\\', L'\0' };
 		if (GetDriveTypeW(root_path) != DRIVE_FIXED)
@@ -231,7 +221,7 @@ static std::vector<std::wstring> CollectAllSteamAppsDirs()
 	return steamapps_dirs;
 }
 
-}  // namespace
+}  
 
 std::vector<std::wstring> FindSteamInstallPaths()
 {
@@ -298,4 +288,4 @@ std::vector<WorkshopAddon> EnumerateCs2WorkshopAddons()
 	return out;
 }
 
-}  // namespace steam_ws
+}  

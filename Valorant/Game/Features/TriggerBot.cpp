@@ -63,10 +63,7 @@ static void ExecuteShot() {
 	if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0)
 		return;
 	g_lastShot = clock::now();
-	/**
-	 * CS2 input poll ~1ms; LEFTDOWN → LEFTUP arasi cok kisa olursa (mikrosaniye)
-	 * oyun tikini gormez ve ates etmez. 12-22ms araligi guvenli/dogal jitter.
-	 */
+	
 	std::uniform_int_distribution<int> d(12, 22);
 	const int ms = d(g_trigDelayRng);
 	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
@@ -110,7 +107,6 @@ static UE4Structs::Vector3 TrigReadTargetHead(uintptr_t targetPawn) noexcept {
 	return {};
 }
 
-/** Catalyst tarzi visible: BVH varsa direkt fraction>0.97, yoksa spotted fallback. */
 static bool TrigCatalystVisibleOk(uintptr_t localPawn, uintptr_t targetPawn, uint32_t spotIdx) noexcept {
 	if (!localPawn || !targetPawn)
 		return false;
@@ -138,7 +134,7 @@ static bool IsEnemyPlayerPawn(uintptr_t pawn, uintptr_t localPawn, int localTeam
 	return true;
 }
 
-} // namespace
+} 
 
 namespace TriggerBot {
 
@@ -148,7 +144,7 @@ void Run(int localTeam, const LegitCombatSettings& cfg, const std::vector<UE4Str
 
 	const int tk = hotkeys::triggerkey.load();
 	const bool tkDown = tk > 0 && ((GetAsyncKeyState(tk) & 0x8000) != 0);
-	/** Hedef / bıcak / flash erken cikisindan once. Boslukta basinca da toggle calissin. */
+	
 	if (!Settings::bMenu && cfg.triggerbot && cfg.trigger_key_mode == 1 && tkDown && !g_trigKeyPrev)
 		g_trigToggleArm = !g_trigToggleArm;
 	g_trigKeyPrev = tkDown;
@@ -196,10 +192,6 @@ void Run(int localTeam, const LegitCombatSettings& cfg, const std::vector<UE4Str
 		return;
 	}
 
-	/**
-	 * m_bWaitForNoAttack: yalnizca gercek dusman hedefi veya local/hedef sis icindeyken devam.
-	 * Crosshair sis uzerinde olmasi TEK BASINA yetmez — dusman bulunmali.
-	 */
 	if (offsets::m_bWaitForNoAttack) {
 		const bool waitNo = g_GameMem.readv<bool>(global_pawn + static_cast<uintptr_t>(offsets::m_bWaitForNoAttack));
 		if (waitNo) {
@@ -350,4 +342,4 @@ bool ToggleArmForUi() {
 	return g_trigToggleArm;
 }
 
-} // namespace TriggerBot
+} 

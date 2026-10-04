@@ -6,7 +6,6 @@
 
 namespace ex_entity {
 
-/** Entity list slot (m_iIDEntIndex & 0x7FFF) -> controller/entity pointer. */
 inline uintptr_t ResolveEntityFromListSlot(int slot) {
 	if (!client || slot <= 0 || slot >= 0x7FFF)
 		return 0;
@@ -21,7 +20,6 @@ inline uintptr_t ResolveEntityFromListSlot(int slot) {
 	return g_GameMem.readv<uintptr_t>(list_entry + stride * (slot & 0x1FF));
 }
 
-/** CGameEntitySystem: 8*((idx>>9))+16 chunk; 8*(idx>>9) parantezli olmali. */
 inline uintptr_t ResolveHandle(uint32_t handle) {
 	if (!handle || handle == 0xFFFFFFFFu || !client)
 		return 0;
@@ -38,7 +36,6 @@ inline uintptr_t ResolveHandle(uint32_t handle) {
 	return g_GameMem.readv<uintptr_t>(list_entry + stride * (handle & 0x1FFu));
 }
 
-/** DragonBurn TriggerBot: iIDEntIndex degerini dogrudan entity handle gibi coz. */
 inline uintptr_t ResolvePawnFromCrosshairIndexDirect(int entIndex) {
 	const uint32_t slot = static_cast<uint32_t>(entIndex) & 0x7FFFu;
 	if (!slot || slot == 0x7FFFu)
@@ -46,7 +43,6 @@ inline uintptr_t ResolvePawnFromCrosshairIndexDirect(int entIndex) {
 	return ResolveHandle(slot);
 }
 
-/** m_iIDEntIndex: once controller->pawn, yoksa dogrudan pawn entity. */
 inline uintptr_t ResolvePlayerPawnFromCrosshairIndex(int entIndex) {
 	const int slot = entIndex & 0x7FFF;
 	if (slot <= 0 || slot >= 0x7FFF)
@@ -67,4 +63,4 @@ inline uintptr_t ResolvePlayerPawnFromCrosshairIndex(int entIndex) {
 	return ResolveHandle(static_cast<uint32_t>(slot));
 }
 
-} // namespace ex_entity
+} 

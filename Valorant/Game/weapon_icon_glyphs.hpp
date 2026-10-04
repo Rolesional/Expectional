@@ -1,5 +1,5 @@
 #pragma once
-/** Catalyst player.cpp get_weapon_icon ile ayni glyph harfi (fonts/weapons_font_data). */
+
 #include <cstring>
 #include <unordered_map>
 #include <string>

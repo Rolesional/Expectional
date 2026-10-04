@@ -65,7 +65,7 @@ float ReadThrowVelocity(std::uintptr_t weapon)
 std::uint32_t TrajectorySimLookupHash(std::uint16_t def_idx, float strength, const Vector3& angles,
                                       const Vector3& origin, const Vector3& pawn_vel)
 {
-	/** Lower quantization = more hash reuse = fewer redundant BVH sims online. */
+	
 	const float ang_q = 1.f;
 	auto qang = [ang_q](float f) -> std::uint32_t {
 		return static_cast<std::uint32_t>(std::lround(f * ang_q)) & 0xFFFFu;
@@ -131,11 +131,6 @@ void TrajectoryWorkerMain()
 			continue;
 		}
 
-		/**
-		 * Mesh yuklendikten sonra artik poll etmiyoruz — bir sonraki map ge\u00e7iste
-		 * mesh reset oldugunda WorldMeshReady false doner, poll geri baslar.
-		 * Valve MM'de anti-cheat / IOCTL latency ile 600ms polling kasabiliyordu.
-		 */
 		const DWORD now_ms = GetTickCount();
 		const bool mesh_ready_now = ex_world_bvh::WorldMeshReady();
 		if (!mesh_ready_now) {
@@ -151,11 +146,6 @@ void TrajectoryWorkerMain()
 		if (!s_mesh_ever_ready)
 			s_mesh_ever_ready = true;
 
-		/**
-		 * Silah nade degilse veya pin cekilmedi ise IOCTL/sim maliyeti sifir olmali.
-		 * Valve MM'de "kasma" sikayeti bu poll dongusunun IOCTL yogunlugundan geliyordu.
-		 * Nade yokken 250ms; nade var ama pin cekilmemis iken 120ms sleep — twitch dogru.
-		 */
 		const std::uint16_t def_idx = ex_esp::ReadWeaponDefIndex(local_pawn);
 		if (def_idx < 43 || def_idx > 48) {
 			ClearDraw();
@@ -173,10 +163,6 @@ void TrajectoryWorkerMain()
 			continue;
 		}
 
-		/**
-		 * Polling sleep: twitch latency icin kisa; ama Valve MM'de IOCTL basina
-		 * anti-cheat delay eklendigi icin 10ms Bomba. Balanced'da 22ms yeterli.
-		 */
 		const int wq_sleep = std::clamp(Settings::misc::workerQuality, 0, 2);
 		const DWORD sleep_ms = (wq_sleep == 0) ? 30u : (wq_sleep == 2) ? 18u : 22u;
 		Sleep(sleep_ms);
@@ -225,11 +211,6 @@ void TrajectoryWorkerMain()
 			continue;
 		}
 
-		/**
-		 * Sim throttle: Valve MM'de BVH trace basina IOCTL cost daha yuksek.
-		 * Pin cekilmemis iken sadece nadiren ~5Hz refresh; pin cekilince 20Hz.
-		 * Sim_cap da dusuruldu — 512 tick gorsel olarak fazladan sey vermiyor.
-		 */
 		const int wq = std::clamp(Settings::misc::workerQuality, 0, 2);
 		const DWORD throttle_ms_pin = (wq == 0) ? 100u : (wq == 2) ? 50u : 65u;
 		const DWORD throttle_ms_hold = (wq == 0) ? 250u : (wq == 2) ? 140u : 180u;
@@ -238,7 +219,7 @@ void TrajectoryWorkerMain()
 			continue;
 
 		cat::CatalystTrajectory traj{};
-		/** sim_cap: 512+ gorsel fark sifir; Valve MM'de ekstra 200 tick = ~5ms lag. */
+		
 		const int sim_cap = (wq == 0) ? 140 : (wq == 2) ? 260 : 190;
 		cat::CatalystSimulateFull(def_idx, origin, velocity, traj, sim_cap);
 		if (!traj.valid || traj.points.size() < 2)
@@ -264,7 +245,7 @@ void EnsureWorker()
 	t.detach();
 }
 
-}  // namespace
+}  
 
 void DrawFrame(const view_matrix_t& vm, std::uintptr_t local_pawn, const Vector3& eye_world)
 {
@@ -290,4 +271,4 @@ void DrawFrame(const view_matrix_t& vm, std::uintptr_t local_pawn, const Vector3
 	cat::DrawTrajectoryPolylineCached(vm, pts, end, hash);
 }
 
-}  // namespace expectional_trajectory
+}  

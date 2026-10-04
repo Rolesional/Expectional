@@ -199,7 +199,6 @@ static bool KernelClientImageUsable(uintptr_t base, std::uint32_t ldr_size = 0);
 static bool KernelEngineImageUsable(uintptr_t base, std::uint32_t ldr_size = 0);
 static uintptr_t KernelSnapshotModuleBase(DWORD pid, const wchar_t* module_name);
 
-/** LDR + offset probe; client/engine birlikte dogrulanir. */
 static bool ResolveClientEngineModules(
     uintptr_t& client_out,
     uintptr_t& engine_out,
@@ -240,7 +239,6 @@ static bool ResolveClientEngineModules(
 			engine_out = static_cast<uintptr_t>(probed);
 	}
 
-	/** Baslik sayfasi kapali olsa da LDR boyutu / isim eslesmesi yeterli. */
 	if (!KernelClientImageUsable(client_out, client_ldr_size) &&
 	    KernelClientImageUsable(named_client, client_ldr_size))
 		client_out = named_client;
@@ -441,7 +439,6 @@ static bool KernelEntityListAtRva(
 	return true;
 }
 
-/** Website RVA 0 ise kernel ile CGameEntitySystem pointer'ini bul, offsets::dwEntityList'i duzelt. */
 static bool KernelFixupEntityList(uintptr_t client_base)
 {
 	if (!client_base)
@@ -670,8 +667,6 @@ struct MenuReadyInfo {
 	bool view_ok = false;
 };
 
-/** Main menu hazir: entity sistemi ayakta VEYA kamera/pawn var.
- *  Oyuncu pawn zinciri main menu'de sik sik 0 olur — ona baglamak takilma sebebiydi. */
 static bool ProbeMainMenuReady(uintptr_t client_base, MenuReadyInfo* info)
 {
 	MenuReadyInfo local{};
@@ -845,7 +840,7 @@ bool KmReadDriver::initdriver(int processid) {
 		        client_resolve_error,
 		        engine_resolve_error,
 		        &verified_highest_entity)) {
-			/* ok */
+			
 		}
 	}
 
@@ -938,7 +933,7 @@ bool KmReadDriver::initdriver(int processid) {
 
 	MenuReadyInfo menu_info{};
 	constexpr int kMenuPollMs = 400;
-	constexpr int kMenuWaitAttempts = 25; /* ~10 sn: entity list kernel'den gelsin */
+	constexpr int kMenuWaitAttempts = 25; 
 	for (int menu_wait = 0; menu_wait < kMenuWaitAttempts; ++menu_wait) {
 		const std::uint32_t live_sz = KernelReadClientSizeOfImage(cached_client);
 		if (live_sz && offsets::dwEntityList &&

@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-/** Player ESP parca ofsetleri (piksel). Kutu ve dolgu burada yok. */
 namespace EspLayout {
 
 enum Id : int {
@@ -174,4 +173,4 @@ inline bool ParseConfig(const std::string& key, float v)
 	return true;
 }
 
-} // namespace EspLayout
+} 

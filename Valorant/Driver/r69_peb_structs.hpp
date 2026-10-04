@@ -1,8 +1,5 @@
 #pragma once
-/**
- * Minimal x64 PEB / LDR layouts for kernel read_module_base (Win10/11 CS2).
- * Offsets match common ntdll/usermode LDR walk used by r69 usermode reference.
- */
+
 #include <Windows.h>
 #include <cstdint>
 

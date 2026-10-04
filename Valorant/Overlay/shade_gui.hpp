@@ -1,14 +1,11 @@
 #pragma once
-/**
- * Shade-usermode/Core/GUI.h dosyasının doğrudan taşınmış hali (yollar / LoadImages stub).
- * Özellik gövdesi: menu.hpp → Expectional_Menu_OnShadeGuiDraw()
- */
+
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 #include "../../Includes/Imgui/imgui.h"
 #include "shade_menu_config_stub.hpp"
-/** `imgui_edited.hpp` (edited:: / ImGuiChildFlags / c:: / font::) menu.hpp içinde bu dosyadan önce include edilir — tekrar etmeyin (C2011). */
+
 #include <d3d11.h>
 
 inline ID3D11ShaderResourceView* Logo = NULL;
@@ -79,7 +76,6 @@ namespace GUI
 
 	inline void LoadDefaultConfig() {}
 
-	/** Shade `Gui.LoadTextureFromMemory` yok — sadece varsayılan pencere konumları. */
 	inline void LoadImages()
 	{
 		static bool s_done = false;

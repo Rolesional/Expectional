@@ -16,7 +16,6 @@
 
 namespace {
 
-/** 0 = kesin gizli, 255 = kesin gorunur; ~3 karede gecis. */
 constexpr int kVisSmoothStep = 72;
 
 std::unordered_map<uintptr_t, int>& VisSmoothMap() {
@@ -87,7 +86,7 @@ bool QueryRawBvhCached(uintptr_t key, bool multi_slot, Fn&& compute) {
 	return slot.value;
 }
 
-} // namespace
+} 
 
 void ExpectionalBvhBudgetBeginFrame() noexcept
 {
@@ -142,7 +141,7 @@ bool ReadTargetHeadWorld(uintptr_t targetPawn, UE4Structs::Vector3& out) {
 	return true;
 }
 
-} // namespace
+} 
 
 static bool SchemaNameIsSmoke(const char* cn) noexcept {
 	if (!cn || !cn[0])
@@ -398,7 +397,7 @@ bool ExpectionalTriggerVisibilityOk(uintptr_t localPawn, uintptr_t targetPawn, u
 {
 	if (!localPawn || !targetPawn)
 		return false;
-	/** Crosshair hedef pawn: sis volumu BVH'de yok, engine trace hedefi gosteriyorsa ates. */
+	
 	if (CrosshairEntityIsTargetPawn(localPawn, targetPawn))
 		return true;
 	if (ex_world_bvh::g_world_bvh.valid() &&
@@ -410,7 +409,7 @@ bool ExpectionalTriggerVisibilityOk(uintptr_t localPawn, uintptr_t targetPawn, u
 		if (SpottedLikeAnanbabanWithMasks(localPawn, targetPawn, lm, tm, spotIndex, spotIndex))
 			return true;
 	}
-	/** Sis arkasindan bulunan hedef: dusman sis icinde + crosshair sis entity uzerinde. */
+	
 	if (ExpectionalCrosshairIsSmokeEntity(localPawn) && ExpectionalPawnInsideActiveSmoke(targetPawn))
 		return true;
 	return false;
@@ -505,11 +504,6 @@ bool ExpectionalPawnInsideActiveSmoke(uintptr_t targetPawn) noexcept
 	return ExpectionalPointInsideActiveSmoke(ReadPawnOrigin(targetPawn));
 }
 
-/**
- * Sis yolunda ates: yalnizca gercek dusman dogrulamasi.
- * Crosshair sis entity uzerindeyken "crossSmoke + dar nisan" TEK BASINA yetmez —
- * dusman spotted / BVH LOS / crosshair index dogrudan o pawn / dusman sis icinde olmali.
- */
 static bool SmokePathEnemyAllowsShot(uintptr_t localPawn, uintptr_t pawn, uint32_t slot, float aimDot) noexcept {
 	if (!localPawn || !pawn)
 		return false;
@@ -521,7 +515,7 @@ static bool SmokePathEnemyAllowsShot(uintptr_t localPawn, uintptr_t pawn, uint32
 	if (offsets::m_entitySpottedState &&
 	    SpottedLikeAnanbaban(localPawn, pawn, slot, slot))
 		return true;
-	/** BVH yok: dusman aktif sis icinde + cok dar nisan (~8 derece). */
+	
 	if (!ex_world_bvh::g_world_bvh.valid() &&
 	    ExpectionalPawnInsideActiveSmoke(pawn) && aimDot >= 0.99f)
 		return true;
@@ -549,7 +543,7 @@ uintptr_t ExpectionalFindTriggerTargetBehindSmoke(uintptr_t localPawn, int local
 		return 0;
 
 	constexpr uintptr_t kStride = 112u;
-	/** Sis arkasindaki dusman: cok dar koni (~8 derece). */
+	
 	constexpr float kMinDot = 0.99f;
 
 	float bestDot = -1.f;
@@ -616,10 +610,6 @@ uintptr_t ExpectionalResolveTriggerTargetPawn(uintptr_t localPawn, int localTeam
 	uintptr_t targetPawn = 0;
 	const bool crosshairOnSmoke = ExpectionalCrosshairIsSmokeEntity(localPawn);
 
-	/**
-	 * Crosshair sis entity uzerindeyken direct crosshair cozumunu KULLANMA —
-	 * entIndex sis'e isaret eder; yanlis hedef veya sis'e sikma riski.
-	 */
 	if (!crosshairOnSmoke && offsets::m_iIDEntIndex && entIndex >= 0 && entIndex != 0x7FFF) {
 		const uintptr_t directPawn = ex_entity::ResolvePawnFromCrosshairIndexDirect(entIndex);
 		if (IsEnemyPawnQuick(directPawn, localPawn, localTeam))

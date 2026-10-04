@@ -1,7 +1,3 @@
-/**
- * VxLang SDK anchor TU (ThirdParty/VxLang). USE_VL_MACRO off → macros no-op, no vxlib link.
- * Startup uses EX_VL_SAFE_* (obfuscation only, no VM) + SEH so vxlib stub issues cannot kill before license/UI.
- */
 
 #include <cstdio>
 #include <Windows.h>

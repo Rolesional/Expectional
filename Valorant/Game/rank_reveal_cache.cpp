@@ -101,7 +101,7 @@ static void PruneMissing(const std::unordered_map<std::uint64_t, bool>& seen_thi
 	}
 }
 
-} // namespace
+} 
 
 void Clear()
 {
@@ -161,4 +161,4 @@ void CollectSteamIds(std::vector<std::uint64_t>& out)
 	}
 }
 
-} // namespace rank_reveal_cache
+} 

@@ -1,14 +1,10 @@
 #pragma once
-/**
- * ananbaban-stable ESP davranislarinin Expectional cizim katmanina ozeti:
- * dolu kutu / gradient, goz hatti, ses halkasi, dunya bombasi, cephane cubugu,
- * mesafe, scoped / blind, AWP nisangah, menu icinde onizleme.
- */
+
 #include "globals.hpp"
 #include "esp_layout.hpp"
 #include "offsets_runtime.hpp"
 #include "structs.hpp"
-/** TriggerBot/config_io gibi TUlarda render.hpp (using UE4Structs) yok; Vector3 global gorunur olmali. */
+
 using UE4Structs::Vector3;
 using UE4Structs::view_matrix_t;
 #include "entity_handle.hpp"
@@ -30,12 +26,10 @@ bool w2s(const Vector3& pos, Vector3& out, view_matrix_t matrix);
 
 namespace ex_esp {
 
-/** Yer silahi ESP: herkesin elindeki silah entity pointer'i (dropped taramada haric tutulur). */
 inline std::unordered_set<uintptr_t> g_equipped_weapon_entities;
-/** Canli pawn ayak konumu (m_vecOrigin) — silah entity adresi tutmazsa bile "adamın üstünde" etiketi keser. */
+
 inline std::vector<Vector3> g_drop_esp_pawn_feet;
 
-/** Tek pawn ayagi ile dropped-ESP silindir testi (yer silahi oyuncu ayagi ustunde/yakin gorunmesin). */
 inline bool WeaponWorldOverlapsPawnFeetCylinder(const Vector3& weaponWorld, const Vector3& feet) {
 	constexpr float kHorizSq = 92.f * 92.f;
 	constexpr float kBelowFeet = 48.f;
@@ -48,7 +42,6 @@ inline bool WeaponWorldOverlapsPawnFeetCylinder(const Vector3& weaponWorld, cons
 	return dz >= -kBelowFeet && dz <= kAboveFeet;
 }
 
-/** Aktif silah pointer'i ile entity listesi bazen tutmuyor; dünya konumu oyuncu silindiri içindeyse dropped sayma. */
 inline bool DroppedWeaponOverlapsPlayerCapsule(const Vector3& weaponWorld) {
 	for (const Vector3& feet : g_drop_esp_pawn_feet) {
 		if (WeaponWorldOverlapsPawnFeetCylinder(weaponWorld, feet))
@@ -57,7 +50,6 @@ inline bool DroppedWeaponOverlapsPlayerCapsule(const Vector3& weaponWorld) {
 	return false;
 }
 
-/** cacheGame ayak listesi + canli PlayerList ( IOCTL yok ) — eldeki silah/bicak etiketi git-gel onleme. */
 inline bool DroppedWeaponOverlapsLivePlayers(const Vector3& weaponWorld) {
 	if (DroppedWeaponOverlapsPlayerCapsule(weaponWorld))
 		return true;
@@ -74,7 +66,6 @@ inline bool DroppedWeaponOverlapsLivePlayers(const Vector3& weaponWorld) {
 	return false;
 }
 
-/** cacheGame ile ayni slot 1..63 controller → pawn → aktif silah cozumu ( IOCTL sayisi: frame basina ~64 kisa okuma). */
 inline void RebuildEquippedWeaponIgnoreSet(uintptr_t localPawn) {
 	g_equipped_weapon_entities.clear();
 	g_drop_esp_pawn_feet.clear();
@@ -101,7 +92,6 @@ inline void RebuildEquippedWeaponIgnoreSet(uintptr_t localPawn) {
 			g_equipped_weapon_entities.insert(wpn);
 	};
 
-	/** Olunun ayagi silindirine dusen silahlari yanlislikla gizleme (yerel oluyken). */
 	if (localPawn && offsets::m_iHealth) {
 		const int lhp = g_GameMem.readv<int>(localPawn + offsets::m_iHealth);
 		if (lhp > 0 && lhp <= 100) {
@@ -144,7 +134,6 @@ inline bool IsPlausibleWeaponDefIndex(uint16_t d) {
 	return d != 0 && d != 0xFFFFu && d <= 600;
 }
 
-/** m_iItemDefinitionIndex bos/kayik; VData m_szName ("weapon_usp_silencer") yedegi. */
 inline uint16_t ReadWeaponDefIndexFromVData(uintptr_t wpn) {
 	if (!wpn || !offsets::entity_m_nSubclassID)
 		return 0;
@@ -184,7 +173,6 @@ inline uint16_t ReadWeaponDefIndex(uintptr_t pawn) {
 	return ReadWeaponDefIndexFromVData(wpn);
 }
 
-/** Aktif silah entity'si zaten cozulduyse (grenade helper); pawn zinciri basarisiz olsa da calisir. */
 inline uint16_t ReadWeaponDefIndexFromWeaponEntity(uintptr_t wpn) {
 	if (!wpn)
 		return 0;
@@ -194,10 +182,6 @@ inline uint16_t ReadWeaponDefIndexFromWeaponEntity(uintptr_t wpn) {
 	return ReadWeaponDefIndexFromVData(wpn);
 }
 
-/**
- * m_hMyWeapons — ananbaban-stable Entity.cpp GetWeaponInventory ile ayni yerlesim:
- * sayim vector tabaninda +0, handle dizisi isaretcisi +8 (CUtlVector {size; pad/data @8}).
- */
 inline bool PawnInventoryContainsWeaponDef(uintptr_t pawn, uint16_t wantDef) {
 	if (!pawn || wantDef == 0)
 		return false;
@@ -223,7 +207,7 @@ inline bool PawnInventoryContainsWeaponDef(uintptr_t pawn, uint16_t wantDef) {
 			}
 			return false;
 		}
-		/** Alternatif layout (eski tahmin): ptr +0, count +0x10 */
+		
 		const uintptr_t dataAlt = g_GameMem.readv<uintptr_t>(vec);
 		const int sizeAlt = g_GameMem.readv<int>(vec + 0x10);
 		if (dataAlt >= 0x10000 && sizeAlt > 0 && sizeAlt <= 64) {
@@ -242,14 +226,12 @@ inline bool PawnInventoryContainsWeaponDef(uintptr_t pawn, uint16_t wantDef) {
 	return ReadWeaponDefIndex(pawn) == wantDef;
 }
 
-/** Gecerli CS2 item index araligi (0xFFFF bos). */
 inline bool IsPlausibleDroppedWeaponDef(uint16_t d) {
 	if (d == 0 || d == 0xFFFFu || d > 600)
 		return false;
 	return true;
 }
 
-/** StrStr benzeri; haystack icinde needle (ASCII buyuk/kucuk harf duyumsuz). */
 inline bool AsciiHaystackContainsInsensitive(const char* hay, const char* needle) {
 	if (!hay || !needle || !needle[0])
 		return false;
@@ -272,10 +254,6 @@ inline bool AsciiHaystackContainsInsensitive(const char* hay, const char* needle
 	return false;
 }
 
-/**
- * ent + m_Econ_AttributeManager... okumasi yanlis sinifta anlamdisiz VA ve IOCTL spam demek;
- * yalnizca sema adinda silah ipucu varsa yapilir.
- */
 inline bool SchemaAllowsDroppedEconReadOnEntity(const char* schemaCn) {
 	if (!schemaCn || !schemaCn[0])
 		return false;
@@ -288,10 +266,6 @@ inline bool SchemaAllowsDroppedEconReadOnEntity(const char* schemaCn) {
 		AsciiHaystackContainsInsensitive(schemaCn, "c4");
 }
 
-/**
- * Yer silahi: once C_BasePlayerWeapon yolu (m_WeaponEcon...), olmazsa (sinirli) C_EconEntity yolu.
- * schemaCn: ReadEntitySchemaClassName ciktisi; yoksa econ fallback kullanilmaz (surucuye gereksiz okuma gitmez).
- */
 inline uint16_t ReadWeaponDefIndexDropped(uintptr_t ent, const char* schemaCn) {
 	if (!ent)
 		return 0;
@@ -330,7 +304,6 @@ inline bool IsSniperDef(uint16_t d) {
 	return d == 9 || d == 40 || d == 38 || d == 11;
 }
 
-/** Silah def index icin kucuk ESP ikon kutusu rengi (texture yokken). */
 inline ImU32 WeaponCategoryTintU32(uint16_t id) {
 	switch (id) {
 	case 49: return IM_COL32(255, 95, 75, 255);
@@ -390,7 +363,6 @@ inline void StrokeTextBg(ImDrawList* dl, const char* txt, float x, float y, ImU3
 	dl->AddText(ImVec2(tx, y), col, txt);
 }
 
-/** StrokeTextBg ile ayni golge; x sol kenar (ESP sag sutun hizasi). */
 inline void StrokeTextBgLeft(ImDrawList* dl, const char* txt, float leftX, float y, ImU32 col) {
 	const ImVec2 ts = ImGui::CalcTextSize(txt);
 	for (int ox = -1; ox <= 1; ++ox)
@@ -430,7 +402,6 @@ inline void DrawEyeRay(const view_matrix_t& vm, const Vector3& headWorld, const 
 	ImGui::GetBackgroundDrawList()->AddLine(ImVec2(s0.x + es.x, s0.y + es.y), ImVec2(s1.x + es.x, s1.y + es.y), col, thick);
 }
 
-/** Radar/world ile ayni: CS2'de pozisyon genelde GameSceneNode->m_vecAbsOrigin; degilse m_vecOrigin. */
 inline Vector3 ReadWorldPositionFromEntity(uintptr_t entity) {
 	if (!entity)
 		return {};
@@ -446,7 +417,6 @@ inline Vector3 ReadWorldPositionFromEntity(uintptr_t entity) {
 	return {};
 }
 
-/** C_BaseEntity::m_hOwnerEntity — silah/C4 entity tasiyan pawn (cozulmus adres). */
 inline uintptr_t ResolveOwnerEntityPtr(uintptr_t ent) {
 	if (!ent || !offsets::m_hOwnerEntity)
 		return 0;
@@ -522,4 +492,4 @@ inline void DrawSnapLine(float cxBox, float yTop, float yBot, ImU32 col, float t
 	ImGui::GetBackgroundDrawList()->AddLine(start, end, col, thick);
 }
 
-} // namespace ex_esp
+} 

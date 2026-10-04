@@ -102,7 +102,7 @@ static bool TriMeshFileValidWide(const std::wstring& path) noexcept {
 	return (sz % kTriBytesPerTriangle) == 0;
 }
 
-} // namespace
+} 
 
 bool TriMeshFileValid(const std::filesystem::path& path) noexcept {
 	try {

@@ -1,4 +1,3 @@
-/** CS2-External-Base overlay — UC #229070 Z-order (TOPMOST yok). */
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -164,7 +163,6 @@ static void CleanupPartialCreate(HINSTANCE hInst) noexcept
 		UnregisterClassW(m_windowClass.lpszClassName, hInst);
 }
 
-/** Present(DO_NOT_WAIT) donguyu serbest birakir; monitor Hz ile sinirla. */
 static void ApplyCaptureExclude(HWND hwnd, bool exclude) noexcept
 {
 	if (!hwnd || !IsWindow(hwnd))
@@ -214,11 +212,11 @@ LRESULT CALLBACK WindowProcess(HWND window, UINT message, WPARAM wparam, LPARAM 
 	return DefWindowProcW(window, message, wparam, lparam);
 }
 
-} // namespace
+} 
 
 namespace ExpectionalOverlayWindow {
 
-void HandleWindowOrder(HWND /*game_hwnd*/)
+void HandleWindowOrder(HWND )
 {
 	if (!m_hWnd || !IsWindow(m_hWnd))
 		return;
@@ -227,7 +225,6 @@ void HandleWindowOrder(HWND /*game_hwnd*/)
 	if (!GameWnd || !IsWindow(GameWnd))
 		return;
 
-	/** eskisurum main_loop: bounds + z-order (TOPMOST yok). */
 	static RECT old_rc{};
 	RECT rc{};
 	POINT xy{};
@@ -291,7 +288,6 @@ bool Create(HWND game_hwnd)
 		return false;
 	}
 
-	/** eskisurum: WS_POPUP + layered/transparent/toolwindow (TOPMOST yok). */
 	constexpr DWORD kExStyle = WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW;
 	constexpr DWORD kStyle = WS_POPUP | WS_VISIBLE;
 	static const wchar_t kWndTitle[] = L"";
@@ -324,7 +320,6 @@ bool Create(HWND game_hwnd)
 	if (!m_uRefreshRate)
 		m_uRefreshRate = 60;
 
-	/** Layered + DWM seffaf overlay: FLIP model siyah opak arka plan yapar — DISCARD + 1 buffer. */
 	DXGI_SWAP_CHAIN_DESC swapChainDesc{};
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = m_uRefreshRate;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1U;
@@ -340,19 +335,6 @@ bool Create(HWND game_hwnd)
 	constexpr D3D_FEATURE_LEVEL levels[2]{ D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0 };
 	D3D_FEATURE_LEVEL level{};
 
-	/**
-	 * BUYUK FPS KAZANC (laptop / hybrid GPU):
-	 * Notepad Windows tarafindan "Power saving" GPU classification aliyor -> DXGI default
-	 * adapter = integrated GPU (Intel UHD / AMD Vega). CS2 dGPU'da kosarken bizim overlay
-	 * iGPU'da kalinca:
-	 *   - cross-GPU DMA bandwidth bottleneck
-	 *   - dGPU compositor surface'a iGPU'dan kopya = ek frame latency
-	 *   - iGPU TDP zaten DUSUK -> overlay 30-40 FPS'te tikilir
-	 * EXE'yi explorer/Steam launchada Windows otomatik "High performance" verir, dGPU secer.
-	 *
-	 * Cozum: IDXGIFactory6::EnumAdapterByGpuPreference(HIGH_PERFORMANCE) ile dGPU'yu
-	 * elle bul, DRIVER_TYPE_UNKNOWN ile D3D11CreateDevice'a explicit adapter ver.
-	 */
 	IDXGIAdapter1* pHighPerfAdapter = nullptr;
 	{
 		IDXGIFactory6* factory6 = nullptr;
@@ -367,13 +349,12 @@ bool Create(HWND game_hwnd)
 	}
 
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(
-		pHighPerfAdapter,                                          /** dGPU varsa onu kullan */
+		pHighPerfAdapter,                                          
 		pHighPerfAdapter ? D3D_DRIVER_TYPE_UNKNOWN
 		                 : D3D_DRIVER_TYPE_HARDWARE,
 		nullptr, 0U, levels, 2U, D3D11_SDK_VERSION,
 		&swapChainDesc, &m_pSwapChain, &m_pDevice, &level, &m_pContext);
 
-	/** dGPU varsa olmadiysa default'a dus. */
 	if (FAILED(hr) && pHighPerfAdapter) {
 		pHighPerfAdapter->Release();
 		pHighPerfAdapter = nullptr;
@@ -389,9 +370,6 @@ bool Create(HWND game_hwnd)
 		CleanupPartialCreate(hInst);
 		return false;
 	}
-
-	/** Not: SetMaximumFrameLatency(1) DISCARD swap-chain'de Present(DO_NOT_WAIT) ile race
-	 *  yarattigi icin kaldirildi. DXGI varsayilan kuyrugu (3) kullaniyoruz. */
 
 	ID3D11Texture2D* pBackBuffer = nullptr;
 	m_pSwapChain->GetBuffer(0U, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
@@ -456,7 +434,6 @@ bool RenderFrame(const std::function<void()>& frame_callback)
 
 	m_pSwapChain->Present(0U, DXGI_PRESENT_DO_NOT_WAIT);
 
-	/** eskisurum main_loop: bounds + z-order her kare. */
 	HandleWindowOrder(g_game_hwnd);
 
 	{
@@ -515,4 +492,4 @@ unsigned GetTargetFrameHz() noexcept
 	return m_uRefreshRate ? m_uRefreshRate : 60u;
 }
 
-} // namespace ExpectionalOverlayWindow
+} 

@@ -26,16 +26,14 @@
 #include <vxlib.h>
 #include "../Protection/vxlang_scope.hpp"
 
-/** GUI::kContentStartX ile ayni — shade_gui.hpp'den once kullanilir. */
 inline constexpr float kExpectionalMenuContentX = (1000.f - (470.f * 2.f + 20.f)) * 0.5f;
 
 inline void ExpectionalAlignMenuContentX() {
 	ImGui::SetCursorPosX(kExpectionalMenuContentX);
 }
 
-/** Bhop acikken konsola: space bosalt, ziplama F24'e (cheat F24 tiklar). */
 inline constexpr const char kExpectionalBhopConsoleSetup[] = "unbind space; unbind f7; bind f24 \"+jump\"";
-/** Bhop kullanmayinca: space'e jump geri, F24 kaldir. */
+
 inline constexpr const char kExpectionalBhopConsoleRestore[] = "bind space \"+jump\"; unbind f24; unbind f7";
 
 inline bool ExpectionalCopyAsciiToClipboard(const char* text)
@@ -66,11 +64,11 @@ inline bool ExpectionalCopyAsciiToClipboard(const char* text)
 
 namespace hotkeys
 {
-	/** Varsayilan: sag tik (VK_RBUTTON). */
+	
 	inline std::atomic<int> aimkey{2};
-	/** ananbaban TriggerBot: varsayilan Mouse5 (VK_XBUTTON2). */
+	
 	inline std::atomic<int> triggerkey{6};
-	/** Toggle cheat menu (default Home). */
+	
 	inline std::atomic<int> menukey{VK_HOME};
 }
 
@@ -85,7 +83,6 @@ inline bool GetKey(int key)
 	return true;
 }
 
-/** CreateThread icin DWORD WINAPI; tik birakilana kadar bekle yoksa fare tikini aimkey sanar. */
 static DWORD WINAPI ChangeKeyThread(LPVOID)
 {
 	keystatus.store(1);
@@ -314,7 +311,6 @@ inline const char* ExpectionalVkPreview(int vk)
 	return preview ? preview : "?";
 }
 
-/** Keybind satiri: [E], [M5], [Hm] ... */
 inline void ExpectionalFmtKeyBracketShort(int vk, char out[20])
 {
 	if (!out)
@@ -361,7 +357,6 @@ inline const char* ExpectionalModeShort(int m)
 	}
 }
 
-/** Keybind overlay: titled window; row text white when inactive, red when that bind is active. */
 inline void ExpectionalKeybindListWindow()
 {
 	if (!Settings::misc::keybind_list_window)
@@ -509,7 +504,6 @@ static void HotkeyButtonMenu(int menuKey, int status)
 	}
 }
 
-/** Kategori tab butonu — kenarli cerceve. */
 inline bool ExpectionalCategoryTabButton(const char* label, bool selected, const ImVec2& size) {
 	ImGui::PushID(label);
 	const ImU32 borderCol = ImGui::GetColorU32(selected ? c::accent : ImVec4(0.22f, 0.22f, 0.22f, 1.f));
@@ -534,7 +528,6 @@ inline bool ExpectionalCategoryTabButton(const char* label, bool selected, const
 	return pressed;
 }
 
-/** Aim/Trigger ic tab: General + kategori butonlari, altinda Master Switch. */
 inline void ExpectionalWeaponCategoryInnerTabs(const char* scope_id) {
 	static int s_prevCategory = -1;
 	int& sel = Settings::weapon_cfg::editor_category_idx;
@@ -552,7 +545,7 @@ inline void ExpectionalWeaponCategoryInnerTabs(const char* scope_id) {
 	static const char* kTabLabels[] = { "General", "Pistols", "H.Pistols", "SMG", "Heavy", "Rifles", "Sniper" };
 	constexpr float kTabH = 30.f;
 	constexpr float kTabGap = 8.f;
-	constexpr float kFullContentW = 470.f * 2.f + 20.f; /* GUI::kPanelColW*2 + GUI::kPanelGap */
+	constexpr float kFullContentW = 470.f * 2.f + 20.f; 
 	const int nTabs = maxIdx + 1;
 	const float kTabW = (kFullContentW - kTabGap * static_cast<float>(nTabs - 1)) / static_cast<float>(nTabs);
 
@@ -650,21 +643,19 @@ public:
 	{
 		static ImColor gradient_colors[] =
 		{
-			//https://txwes.libguides.com/c.php?g=978475&p=7075536
-
-			//Red
+			
 			ImColor(0, 0, 0),
-			//Yellow
+			
 			ImColor(0, 0, 0),
-			//Lime
+			
 			ImColor(0, 0, 0),
-			//Cyan / Aqua
+			
 			ImColor(0, 0, 0),
-			//Blue
+			
 			ImColor(0, 0, 0),
-			//Magenta / Fuchsia
+			
 			ImColor(0, 0, 0),
-			//Red
+			
 			ImColor(0, 0, 0)
 		};
 
@@ -689,7 +680,6 @@ public:
 						ImVec2((screen_pos.x - item_spacing.x - displacement) + (i) * (size.x / 6), (screen_pos.y - item_spacing.y)),
 						ImVec2((screen_pos.x - item_spacing.x + (item_spacing.x * 2) - displacement) + (i + 1) * (size.x / 6), (screen_pos.y - item_spacing.y) + (size.y)),
 
-						//add one to color to create a skuffed blend
 						gradient_colors[i], gradient_colors[i + 1], gradient_colors[i + 1], gradient_colors[i]
 					);
 				};
@@ -700,8 +690,6 @@ public:
 	}
 };
 
-
-/** Etkilesim bitince (slider birak vb.) cfg kaydet — edited widget'lar da IsAnyItemActive ile yakalanir. */
 inline void ExpectionalTryAutosaveAfterMenuInteraction() {
 	if (!Settings::misc::autosave_config || !Settings::bMenu)
 		return;
@@ -712,7 +700,6 @@ inline void ExpectionalTryAutosaveAfterMenuInteraction() {
 	s_anyItemWasActive = anyActive;
 }
 
-/** Sekme içeriği (Aim / Trigger / ESP / Misc / Config). esp_part: -1 tam ESP sekmesi; 0 sol panel Players; 1 sağ panel Other. */
 inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 {
 	switch (s_mainTabSel) {
@@ -786,7 +773,7 @@ inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 					bool hb_head = (hitbox_mask & 1u) != 0;
 					bool hb_neck = (hitbox_mask & 2u) != 0;
 					bool hb_pelvis = (hitbox_mask & 4u) != 0;
-					/* SameLine + edited::Checkbox sagda 195px reserve kestigi icin "Pelvis" kirpiliyordu */
+					
 					edited::Checkbox("Head##hbh", "", &hb_head);
 					edited::Checkbox("Neck##hbn", "", &hb_neck);
 					edited::Checkbox("Pelvis##hbp", "", &hb_pelvis);
@@ -855,7 +842,6 @@ inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 			}
 			case 2: {
 
-			
 				const ImGuiColorEditFlags kEspColRgb = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel;
 				const ImGuiColorEditFlags kEspColRgba = kEspColRgb | ImGuiColorEditFlags_AlphaPreviewHalf;
 
@@ -1038,7 +1024,7 @@ inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 						static std::string s_sel_map;
 						static int s_last_count = -1;
 						static bool s_warning_acked = false;
-						static std::string s_pending_pack_id;  /** popup acikken kullanicinin onaylamayi bekledigi paket */
+						static std::string s_pending_pack_id;  
 						static bool s_open_warning_popup = false;
 
 						const int cur_count = static_cast<int>(total_packs);
@@ -1090,7 +1076,7 @@ inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 								ImGui::PushID(p.id.c_str());
 								if (ImGui::Checkbox("##act", &want_active)) {
 									if (want_active && !was_active) {
-										/** Uyari kurali: AYNI MAP'te zaten 1+ paket aktifse uyar. */
+										
 										const std::size_t same_map = ExpectionalLineupBrowserActiveCountForMap(p.map);
 										if (same_map >= 1 && !s_warning_acked) {
 											s_pending_pack_id = p.id;
@@ -1115,7 +1101,6 @@ inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 						}
 						ImGui::EndChild();
 
-						/** Uyari popup'i — viewport merkezinde acilir. */
 						if (s_open_warning_popup) {
 							s_open_warning_popup = false;
 							ImGui::OpenPopup("Multiple packs warning");
@@ -1276,7 +1261,7 @@ inline void ExpectionalDrawMenuTabBody(int s_mainTabSel, int esp_part = -1)
 					}
 				}
 				ImGui::EndChild();
-				//ImGui::TextDisabled("Dosya adi (.cfg otomatik). Listeden sec veya yeni ad yazip Save.");
+				
 				ImGui::InputText("##cfgname", cfgNameBuf, sizeof cfgNameBuf);
 				if (ImGui::Button("Save")) {
 					if (ExpectionalConfigSave(cfgNameBuf)) {
@@ -1410,7 +1395,7 @@ inline void drawmenu()
 		int mk = hotkeys::menukey.load();
 		if (mk <= 0 || mk > 255)
 			mk = VK_HOME;
-		/* GetAsyncKeyState & 1: tekrar / anketleme ile cok kez tetiklenebilir; basili tutunca menü yanıp söner. */
+		
 		static bool s_menuKeyDownPrev = false;
 		const bool down = (GetAsyncKeyState(mk) & 0x8000) != 0;
 		if (down && !s_menuKeyDownPrev)
@@ -1430,7 +1415,6 @@ inline void drawmenu()
 
 		GUI::DrawGui();
 
-		/** ImGui X ile kapatildiysa; her kare ShowMenu->bMenu yapma (menü hemen kapaniyordu). */
 		if (!MenuConfig::ShowMenu)
 			Settings::bMenu = false;
 

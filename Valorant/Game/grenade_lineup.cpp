@@ -63,7 +63,7 @@ static void NadeKindRgb(LineupNadeKind k, int& r, int& g, int& b) {
 	case LineupNadeKind::kHe: r = 255; g = 215; b = 55; break;
 	case LineupNadeKind::kFlash: r = 255; g = 255; b = 245; break;
 	case LineupNadeKind::kDecoy: r = 130; g = 195; b = 255; break;
-	default: r = 200; g = 220; b = 235; break; // smoke
+	default: r = 200; g = 220; b = 235; break; 
 	}
 }
 
@@ -83,7 +83,6 @@ static ImU32 NadeKindImU32(LineupNadeKind k, float alpha) {
 	return IM_COL32(r, g, b, static_cast<int>(std::clamp(alpha, 0.f, 1.f) * 255.f));
 }
 
-/** CS2 econ item def (tutulan nade): 43 flash, 44 HE, 45 smoke, 46 molotov, 47 decoy, 48 inc. */
 static LineupNadeKind HeldNadeKindFromDefIndex(std::uint16_t def) noexcept {
 	switch (def) {
 	case 43: return LineupNadeKind::kFlash;
@@ -103,38 +102,35 @@ struct LineupEntry {
 	Vector3 stand{};
 	Vector3 angles{};
 	Vector3 target{};
-	/** CS2 TextPositionOffset: Title/Desc kutusu bu dunya noktasinda (genelde stand + Z). */
+	
 	Vector3 label_world{};
-	/** 0 center, 1 left, 2 right — TextHorizontalAlign. */
+	
 	std::uint8_t label_h_align = 0;
 	ExpectionalGrenadeThrowType throw_type = ExpectionalGrenadeThrowType::kNormal;
 	LineupNadeKind nade_kind = LineupNadeKind::kSmoke;
-	/** Bu lineup hangi pack'ten geldi (dosya yolu) — render aktif pack'leri kullanir. */
+	
 	std::string pack_id;
 };
 
-/** Pack: bir .txt dosyasi = bir guide paketi. */
 struct LineupPack {
-	std::string id;                       /**< Tam dosya yolu (UTF-8). Benzersiz key. */
-	std::string title;                    /**< Goruntuleme adi (KV3 'Title' veya dosya adi). */
-	std::string map;                      /**< Paketin bagli oldugu map (cogu zaman tek map). */
-	std::vector<std::size_t> lineup_idx;  /**< g_lineups icindeki indexler. */
+	std::string id;                       
+	std::string title;                    
+	std::string map;                      
+	std::vector<std::size_t> lineup_idx;  
 };
 
 std::mutex g_lineup_mtx;
 std::vector<LineupEntry> g_lineups;
 std::unordered_map<std::string, std::vector<size_t>> g_lineups_by_map;
-std::vector<LineupPack> g_packs;                                  /**< Tum paketler. */
-std::unordered_map<std::string, std::size_t> g_pack_by_id;        /**< pack_id -> g_packs idx. */
+std::vector<LineupPack> g_packs;                                  
+std::unordered_map<std::string, std::size_t> g_pack_by_id;        
 std::unordered_map<std::string, std::vector<std::size_t>> g_packs_by_map;
 std::atomic<bool> g_loaded{false};
 std::atomic<bool> g_load_started{false};
 
-/** Browser staging + active set: pack_id'leri tutar (kullanici secimi). */
 std::mutex g_browser_mtx;
-std::vector<std::string> g_browser_staged;  /**< pack_id'ler */
-std::vector<std::string> g_browser_active;  /**< pack_id'ler */
-/** Global hard cap yok; sadece map basina 2'den fazla olunca uyari verilir. */
+std::vector<std::string> g_browser_staged;  
+std::vector<std::string> g_browser_active;  
 
 static void RebuildLineupMapIndex() {
 	g_lineups_by_map.clear();
@@ -146,7 +142,6 @@ static void RebuildLineupMapIndex() {
 	}
 }
 
-/** g_lineups -> g_packs aggregation. Embedded (pack_id bos) lineup'lar paket olusturmaz. */
 static void RebuildPackIndex() {
 	g_packs.clear();
 	g_pack_by_id.clear();
@@ -154,7 +149,7 @@ static void RebuildPackIndex() {
 	for (std::size_t i = 0; i < g_lineups.size(); ++i) {
 		const LineupEntry& le = g_lineups[i];
 		if (le.pack_id.empty())
-			continue;  /** built-in / embedded lineup'lar pakette gosterilmez */
+			continue;  
 		auto it = g_pack_by_id.find(le.pack_id);
 		if (it == g_pack_by_id.end()) {
 			LineupPack p;
@@ -204,7 +199,6 @@ static float Smoothstep01(float edge0, float edge1, float x) noexcept {
 	return t * t * (3.f - 2.f * t);
 }
 
-/** save_fps: ayak halkasi kenarinda aim HUD'un git-gel etmesini azaltir. */
 static float SmoothStandBlend(uintptr_t key, float target) noexcept {
 	if (!Settings::misc::save_fps || key == 0)
 		return target;
@@ -227,7 +221,6 @@ static uintptr_t LineupBlendKey(const Vector3& stand) noexcept {
 	return static_cast<uintptr_t>((hx * 0x9E3779B1ull) ^ (hy * 0x85EBCA6Bull) ^ (hz * 0xC2B2AE35ull));
 }
 
-/** Ayak zemini (m_vecOrigin) — aim nisani sadece stand halkasi uzerindeyken. */
 static Vector3 ReadLocalPawnFeetWorld(std::uintptr_t pawn) noexcept {
 	if (!pawn || !offsets::m_vecOrigin)
 		return {};
@@ -321,13 +314,13 @@ static void LoadBundledLineupsOnce() {
 			continue;
 		tmp.push_back(std::move(e));
 	}
-	/** Legacy: kullanici klasoru (Belgeler\Expectional\lineups) geriye uyumluluk. */
+	
 	{
 		std::vector<grenade_lineup_workshop::ParsedRow> ws;
 		grenade_lineup_workshop::AppendWorkshopKv3FromDirectory(ExpectionalLineupsDirWide(), ws);
 		AppendParsedRowsTo(tmp, ws, &pack_titles);
 	}
-	/** Steam workshop: tum kutuphanelerdeki workshop\\content\\730 agacini tara. */
+	
 	{
 		for (const std::wstring& ws730 : steam_ws::FindAllWorkshopContent730Roots()) {
 			std::vector<grenade_lineup_workshop::ParsedRow> ws;
@@ -340,13 +333,13 @@ static void LoadBundledLineupsOnce() {
 		g_lineups = std::move(tmp);
 		RebuildLineupMapIndex();
 		RebuildPackIndex();
-		/** pack_id -> KV3 dosyasindan cikartilmis baslik veya dosya adi. */
+		
 		for (LineupPack& p : g_packs) {
 			auto it = pack_titles.find(p.id);
 			if (it != pack_titles.end() && !it->second.empty())
 				p.title = it->second;
 			if (p.title.empty()) {
-				/** Yedek: dosya adini cikar. */
+				
 				std::string n = p.id;
 				const size_t s1 = n.find_last_of("/\\");
 				if (s1 != std::string::npos) n = n.substr(s1 + 1);
@@ -511,7 +504,6 @@ static void DrawLineupHud(
 	}
 }
 
-/** BOM / bozuk UTF-8 sonrasi ImGui'de ? gorunen karakterleri kirp. */
 static std::string SanitizeLineupTitleForDisplay(std::string s) {
 	while (s.size() >= 3 && (unsigned char)s[0] == 0xEFu && (unsigned char)s[1] == 0xBBu && (unsigned char)s[2] == 0xBFu)
 		s.erase(0, 3);
@@ -524,7 +516,6 @@ static std::string SanitizeLineupTitleForDisplay(std::string s) {
 	return s;
 }
 
-/** CS2 practice: gokyuzu nisani — siyah kutu, ASCII bullet + hedef adi, altta throw; nokta tam aim'de. */
 static std::string LineupNameFirstLine(const std::string& s) {
 	const std::string cleaned = SanitizeLineupTitleForDisplay(s);
 	size_t n = 0;
@@ -592,9 +583,8 @@ static void DrawCs2StyleAimMarker(
 	dl->AddCircleFilled(aimScreen, dotR, IM_COL32(255, 255, 255, dotA));
 }
 
-} // namespace
+} 
 
-/** Workshop isimlerinde gecen jump / jt / crouch vb. -> HUD throw etiketi (embed 0 kalsa bile). */
 static ExpectionalGrenadeThrowType ThrowTypeFromLineupName(const std::string& name, ExpectionalGrenadeThrowType base) noexcept {
 	std::string s;
 	s.reserve(name.size());
@@ -678,11 +668,6 @@ void ExpectionalGrenadeLineupRender(
 	if (curMap.empty())
 		curMap = "*";
 
-	/**
-	 * Render politikasi: kullanici Browser'dan aktif ettigi PAKETLERIN (max 2)
-	 * tum lineup'larini ciz. Pack'in map'i suanki map ile uyusmuyorsa atla
-	 * (wildcard / bos olan paketler her map'te gosterilir).
-	 */
 	std::vector<size_t> map_indices;
 	{
 		std::vector<std::string> active_pack_ids;
@@ -712,17 +697,17 @@ void ExpectionalGrenadeLineupRender(
 		return;
 
 	ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
-	/** Mesafe filtresi yok: ekranda gorunuyorsa (w2s) cizilir. */
+	
 	constexpr float kStandAlpha = 0.72f;
-	/** Ayak alti yer halkasi — kucuk tutulur. */
+	
 	constexpr float kStandRingRadiusWorld = 5.25f;
 	constexpr int kStandRingSegments = 32;
 	constexpr float kStandRingLineThick = 0.85f;
-	/** Aim: ayak XY mesafesi stand halkasi yaricapina gore (crosshair degil). */
+	
 	const float kFootAimHorizInner = kStandRingRadiusWorld + 8.f;
 	const float kFootAimHorizOuter = kStandRingRadiusWorld + 36.f;
 	constexpr float kAimRevealFootZMax = 56.f;
-	/** Yazi: uzak = kucuk, yakin = buyuk. */
+	
 	constexpr float kLabelScaleRefDist = 880.f;
 	constexpr float kLabelScaleMin = 0.34f;
 	constexpr float kLabelScaleMax = 1.12f;
@@ -774,7 +759,7 @@ void ExpectionalGrenadeLineupRender(
 				draw_list, vm, lu.stand, kStandRingRadiusWorld, kStandRingSegments, ringCol, kStandRingLineThick);
 			const ImU32 txt = NadeKindImU32(lu.nade_kind, kStandAlpha);
 			const std::string titleDraw = LineupNameFirstLine(lu.name);
-			/** anchorTop: halkanin ekran merkezinin hemen alti; kutu asagi dogru uzanir. */
+			
 			DrawLineupHud(
 				draw_list,
 				ImVec2(spStand.x, spStand.y + 13.f * labelScale),
@@ -810,11 +795,6 @@ void ExpectionalGrenadeLineupRender(
 		++drawn;
 	}
 }
-
-/* ============================================================================
- * Lineup Browser API: PAKET (her .txt dosyasi = 1 paket) bazinda calisir.
- * Sol: map listesi. Sag: o map'e ait paketler. Aktif: max 2 paket.
- * ============================================================================ */
 
 std::vector<std::string> ExpectionalLineupBrowserMapList()
 {
@@ -961,7 +941,7 @@ void ExpectionalLineupBrowserActiveSetFromConfig(const std::vector<std::string>&
 {
 	std::lock_guard<std::mutex> lk(g_browser_mtx);
 	g_browser_active = ids;
-	/** Mukerrer kayitlari at. */
+	
 	std::vector<std::string> uniq;
 	uniq.reserve(g_browser_active.size());
 	for (const std::string& s : g_browser_active) {
@@ -981,12 +961,7 @@ void ExpectionalLineupBrowserClearActive()
 
 void ExpectionalLineupBrowserRefreshWorkshop()
 {
-	/**
-	 * Workshop'u yeniden tara — kullanicinin aktif paketlerini KAYBETMEDEN.
-	 * pack_id'ler tam dosya yolu olduklari icin, ayni dosya hala diskte varsa
-	 * yeniden parse sonrasinda ayni id ile g_pack_by_id'de bulunur ve render
-	 * normal akisinda devam eder. Dosya silindiyse ID dormant kalir (zarari yok).
-	 */
+	
 	g_loaded = false;
 	g_load_started = false;
 	EnsureLineupsLoadAsync();

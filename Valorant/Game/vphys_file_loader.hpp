@@ -1,20 +1,4 @@
 #pragma once
-/**
- * .vphys / .vphys_c yukleyici — tam otomatik.
- *
- * Strateji (oncelik sirasi):
- *   1. <exe>/vphys/<harita>.vphys   — text KV3 (opsiyonel manuel)
- *   2. CS2 VPK'sindan vphys_c       — binary KV3 (tam otomatik)
- *
- * g_load_source'daki kodlar:
- *   "none"       – hicbir sey bulunamadi
- *   "E:nomap"    – harita adi okunamadi
- *   "E:nodir"    – CS2 kurulum dizini bulunamadi
- *   "E:novpk"    – VPK'da dosya yok
- *   "E:parse"    – veri ayiklandi ama ucgen cikartılamadi
- *   "file:XXX"   – disk'ten text KV3
- *   "vpk:XXX"    – VPK'dan binary KV3
- */
 
 #include "catalyst_world_bvh.hpp"
 #include "vpk_reader.hpp"
@@ -33,9 +17,6 @@
 
 namespace vphys_loader {
 
-// ---------------------------------------------------------------------------
-// Yardimcilar
-// ---------------------------------------------------------------------------
 static std::string ExeDirectory()
 {
 	char buf[ MAX_PATH ]{};
@@ -58,9 +39,6 @@ static std::vector<std::uint8_t> ReadFileDisk( const std::string& path )
 	return buf;
 }
 
-// ---------------------------------------------------------------------------
-// Harita adi okuma
-// ---------------------------------------------------------------------------
 static std::string ReadCurrentMapName()
 {
 	const std::uintptr_t eng = g_GameMem.engine_address();
@@ -77,7 +55,6 @@ static std::string ReadCurrentMapName()
 		std::string raw = g_GameMem.ReadString( pStr, 260 );
 		if ( raw.empty() ) continue;
 
-		// "maps/de_dust2.bsp" → "de_dust2"
 		const auto sl = raw.find_last_of( "\\/" );
 		if ( sl != std::string::npos ) raw.erase( 0, sl + 1 );
 		if ( raw.size() > 4 && raw.compare( raw.size() - 4, 4, ".bsp" ) == 0 )
@@ -92,9 +69,6 @@ static std::string ReadCurrentMapName()
 	return {};
 }
 
-// ---------------------------------------------------------------------------
-// Text KV3 parser  (vigilant-disco mantigi)
-// ---------------------------------------------------------------------------
 static std::vector<unsigned char> HexToBytes( const std::string& hex )
 {
 	std::string h;
@@ -185,32 +159,22 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromTextKV3(
 	return out;
 }
 
-// ---------------------------------------------------------------------------
-// Binary KV3 geometry scanner
-//
-// VPK'dan cekilen binary bytes bolumunu heuristik tarar.
-// binary_bytes bolusmu: [tri_blob_0][vert_blob_0][tri_blob_1]...
-// Arka arkaya float tripletleri (vertex) ve int tripletleri (indices) arar.
-// ---------------------------------------------------------------------------
 static bool IsValidMapCoord( float v )
 {
-	// Source2 harita koordinatlari: genelde -32768 ile 32768 arasinda
+	
 	const auto u = *reinterpret_cast<const std::uint32_t*>( &v );
-	if ( ( u & 0x7F800000u ) == 0x7F800000u ) return false; // inf/nan
+	if ( ( u & 0x7F800000u ) == 0x7F800000u ) return false; 
 	return v > -65536.0f && v < 65536.0f;
 }
 
-// binary_bytes bolumunde vertex blogu bul; geri kalan kismi indices say
 static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryBlob(
 	const std::uint8_t* bin, std::size_t bin_size )
 {
 	struct Vtx { float x, y, z; };
 	struct Tri { std::int32_t a, b, c; };
 
-	// Hedef: en buyuk gecerli vertex blogu + onunla eslesen indices blogu
 	std::vector<ex_world_bvh::bvh::triangle> best;
 
-	// Tum 12-byte hizali konumlarda vertex blogu ara
 	for ( std::size_t vi = 0; vi + 12 <= bin_size; vi += 4 )
 	{
 		Vtx v0;
@@ -218,7 +182,6 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryBlob(
 		if ( !IsValidMapCoord( v0.x ) || !IsValidMapCoord( v0.y ) ||
 			 !IsValidMapCoord( v0.z ) ) continue;
 
-		// Kac tane art arda gecerli vertex var?
 		std::size_t nv = 1;
 		while ( vi + nv * 12 + 12 <= bin_size )
 		{
@@ -228,15 +191,13 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryBlob(
 				 !IsValidMapCoord( vt.z ) ) break;
 			++nv;
 		}
-		if ( nv < 64 ) continue; // cok az vertex
+		if ( nv < 64 ) continue; 
 
-		// vertex blogunun hemen oncesinde triangle indisleri ara
 		const std::size_t vbytes   = nv * 12;
-		const std::size_t ibytes   = vi; // onceki alan
+		const std::size_t ibytes   = vi; 
 		const std::size_t ni_max   = ibytes / 12;
 		if ( ni_max < 32 ) continue;
 
-		// Gercek indices bolgesi: vi oncesi, 12 byte onceden geri git
 		std::size_t ti_end = vi;
 		std::size_t ti     = ti_end;
 		while ( ti >= 12 )
@@ -254,11 +215,9 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryBlob(
 		const std::size_t ni       = ( ti_end - ti_start ) / 12;
 		if ( ni < 32 ) continue;
 
-		// Ucgen listesi olustur
 		std::vector<ex_world_bvh::bvh::triangle> cand;
 		cand.reserve( ni );
 
-		// Vertex tablosu
 		std::vector<Vtx> verts( nv );
 		std::memcpy( verts.data(), bin + vi, nv * 12 );
 
@@ -280,7 +239,6 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryBlob(
 		if ( cand.size() > best.size() )
 			best = std::move( cand );
 
-		// vertex blogunun hemen sonrasinda da indices olabilir
 		{
 			const std::size_t idx_start = vi + vbytes;
 			std::size_t ni2 = 0;
@@ -320,18 +278,15 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryBlob(
 			}
 		}
 
-		vi += vbytes - 4; // bolgeden cik (dongu ++4 yapacak)
+		vi += vbytes - 4; 
 	}
 	return best;
 }
 
-// ---------------------------------------------------------------------------
-// Ham bayt bolumunu (herhangi bir bloktan gelen) ucgen icin tara
-// ---------------------------------------------------------------------------
 static std::vector<ex_world_bvh::bvh::triangle> TryExtractFromRawBlock(
 	const std::uint8_t* blk_data, std::size_t blk_size )
 {
-	// binary KV3 mi?
+	
 	if ( blk_size >= 4 && blk_data[0] == 'V' && blk_data[1] == 'K' &&
 		 blk_data[2] == 'V' && blk_data[3] == 0x03 )
 	{
@@ -342,25 +297,19 @@ static std::vector<ex_world_bvh::bvh::triangle> TryExtractFromRawBlock(
 			if ( !t.empty() ) return t;
 		}
 	}
-	// Text KV3 mi?
+	
 	auto t2 = TrianglesFromTextKV3( blk_data, blk_size );
 	if ( !t2.empty() ) return t2;
 
-	// Ham heuristik tarama (Rubikon binary physics gibi formatlar icin)
 	return TrianglesFromBinaryBlob( blk_data, blk_size );
 }
 
-// ---------------------------------------------------------------------------
-// Binary (compiled) vphys_c / vwrld_c icinden ucgen cikar
-// Tum Source2 resource bloklari taranir (DATA, PHYS, MBUF …)
-// ---------------------------------------------------------------------------
 static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryVphys(
 	const std::uint8_t* data, std::size_t size )
 {
-	// 1. Source2 resource bloklari bul
+	
 	const auto blocks = vpk_reader::FindAllBlocks( data, size );
 
-	// Blok oncelik sirasi: PHYS > DATA > diger
 	auto GetOrder = []( const char* t ) -> int
 	{
 		if ( std::memcmp( t, "PHYS", 4 ) == 0 ) return 0;
@@ -381,7 +330,6 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryVphys(
 		if ( !t.empty() ) return t;
 	}
 
-	// Blok yoksa/basarisizsa dosyanin tamamini tara
 	{
 		auto t = TryExtractFromRawBlock( data, size );
 		if ( !t.empty() ) return t;
@@ -390,16 +338,12 @@ static std::vector<ex_world_bvh::bvh::triangle> TrianglesFromBinaryVphys(
 	return {};
 }
 
-// ---------------------------------------------------------------------------
-// Ana yukleyici
-// ---------------------------------------------------------------------------
 static std::vector<ex_world_bvh::bvh::triangle> LoadTrianglesForMap(
 	const std::string& mapName, std::string& source_out )
 {
 	source_out = "E:none";
 	const std::string exeDir = ExeDirectory();
 
-	/** Strateji 1: Manuel disk dosyasi */
 	const std::vector<std::string> manual_paths = {
 		exeDir + "vphys\\" + mapName + ".vphys",
 		exeDir + "vphys\\" + mapName + "_c0.vphys",
@@ -419,7 +363,6 @@ static std::vector<ex_world_bvh::bvh::triangle> LoadTrianglesForMap(
 		}
 	}
 
-	/** Strateji 2: VPK otomatik ayiklama */
 	const std::string game_dir = vpk_reader::GetCs2GameDir();
 	if ( game_dir.empty() )
 	{
@@ -445,7 +388,7 @@ static std::vector<ex_world_bvh::bvh::triangle> LoadTrianglesForMap(
 
 	if ( tris.empty() )
 	{
-		// VPK girisi bulundu ama ucgen cikarilmadi: yolu kaydet
+		
 		source_out = "E:parse:" + found_path;
 		return {};
 	}
@@ -454,11 +397,8 @@ static std::vector<ex_world_bvh::bvh::triangle> LoadTrianglesForMap(
 	return tris;
 }
 
-// ---------------------------------------------------------------------------
-// Durum
-// ---------------------------------------------------------------------------
 inline std::string g_last_loaded_map;
-inline std::string g_load_source; // "vpk:..." / "file:..." / "E:nodir" / ...
+inline std::string g_load_source; 
 
 static bool TickFileLoader()
 {
@@ -483,4 +423,4 @@ static bool TickFileLoader()
 	return true;
 }
 
-} // namespace vphys_loader
+} 

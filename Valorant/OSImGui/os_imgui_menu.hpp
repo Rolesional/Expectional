@@ -4,7 +4,6 @@
 #include <algorithm>
 #include "shade_imgui_settings.h"
 
-/** Shade OS-ImGui menü katmanı: aynı tek ImGui context + D3D9; DX11 OS-ImGui penceresi yok. */
 void ExpectionalOsMenu_InitFonts();
 bool ExpectionalOsMenu_FontsReady();
 
@@ -12,7 +11,6 @@ void ExpectionalOsMenu_ApplyStyle(ImGuiStyle* style);
 void ExpectionalOsMenu_DrawDecoration(const char* titleWhite, const char* titleAccentSuffix);
 bool ExpectionalOsMenu_Tab(bool selected, const char* icon, const char* label, const ImVec2& size_arg);
 
-/** Overlay / HUD pencereleri: menü ile aynı Lexend (global ImGuiStyle’a dokunmaz). */
 struct ExpectionalOsMenu_UiFontScope {
 	int pushed = 0;
 	ExpectionalOsMenu_UiFontScope()
@@ -31,7 +29,6 @@ struct ExpectionalOsMenu_UiFontScope {
 	ExpectionalOsMenu_UiFontScope& operator=(const ExpectionalOsMenu_UiFontScope&) = delete;
 };
 
-/** Bomb timer / spectator / küçük HUD pencereleri: Shade palette + Lexend; global ImGuiStyle’a dokunmaz. */
 struct ExpectionalOsMenu_HudStyleScope {
 	ExpectionalOsMenu_UiFontScope font_;
 	ExpectionalOsMenu_HudStyleScope()
@@ -61,7 +58,6 @@ struct ExpectionalOsMenu_HudStyleScope {
 	ExpectionalOsMenu_HudStyleScope& operator=(const ExpectionalOsMenu_HudStyleScope&) = delete;
 };
 
-/** Son ImGui ogesi (InvisibleButton vb.) uzerinden pencereyi surukle — ust serit gerekmez. */
 inline void ExpectionalHudDragFromLastItem(const char* drag_id) noexcept
 {
 	ImGuiWindow* win = ImGui::GetCurrentWindow();
@@ -84,7 +80,6 @@ inline void ExpectionalHudDragFromLastItem(const char* drag_id) noexcept
 	}
 }
 
-/** HUD pencereleri: ust bardan surukle (MouseDragDelta; frame basina birikim yok). */
 inline void ExpectionalHudDragBar(const char* id, float bar_h = 22.f) noexcept
 {
 	ImGuiWindow* win = ImGui::GetCurrentWindow();

@@ -1,5 +1,5 @@
 #pragma once
-/** Shade / OS-ImGui menu palette + font pointers (purna `imgui_settings.h`), ImGui from projede. */
+
 #include "../../Includes/Imgui/imgui.h"
 
 namespace font
