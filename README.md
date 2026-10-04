@@ -58,7 +58,7 @@ Because the software is read only (for now), features like a skin changer are im
   - World mesh (world BVH) based autowall / penetration math, so wall info stays correct
 
 - **Lineup Helper**
-  - Uses workshop guide lineup data
+  - Uses workshop guide lineup data, can get lineups from ur steam workshop files.
   - Lineup files live in `%LOCALAPPDATA%\Expectional\lineups`, a readme is created in that folder automatically
 
 - **Spectator List**
@@ -142,6 +142,7 @@ Requirements:
 
 - Visual Studio 2022 or Build Tools 2022 (MSVC v143 toolset, x64)
 - Windows SDK
+- Windows WDK (If u want to compile the driver)
 - Desktop development with C++ workload
 
 Steps:
@@ -207,14 +208,3 @@ After a CS2 update the offsets become stale. Dump them again with [cs2-dumper](h
 The driver and overlay are designed to stay under the radar of VAC by omitting the identifier, XOR encrypting strings and only reading memory. This is not a guarantee.
 
 **VAC Live** is a server side system that scans AI assisted gameplay. There is no bypass for the Aimbot and Triggerbot. Use them at your own risk and keep Overwatch / demo reviews in mind as well.
-
----
-
-# Credits
-
-- [singhhdev](https://github.com/singhhdev/cs2-external-source-kernel) — original codebase
-- Rolesional — modifications and added features
-- [TheCruZ/kdmapper](https://github.com/TheCruZ/kdmapper) — driver mapping
-- [a2x/cs2-dumper](https://github.com/a2x/cs2-dumper) — offset dumping tool
-
-Discord: https://discord.gg/ACGvzP9cwy
