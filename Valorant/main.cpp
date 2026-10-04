@@ -189,7 +189,7 @@ static int ExpectionalMainEntry()
 		}
 
 		if (!ExpectionalLoadOffsetsFromLocalFiles()) {
-			printf("> offsets: exe yanindaki offsets klasorune offsets.hpp + client_dll.hpp koy.\n");
+			printf("Offsets not found pls put dumped offsets at offsets folder.\n");
 			ApplyFallbackOffsets();
 		}
 
