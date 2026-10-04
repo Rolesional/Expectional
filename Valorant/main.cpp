@@ -188,7 +188,10 @@ static int ExpectionalMainEntry()
 			Sleep(250);
 		}
 
-		ApplyFallbackOffsets();
+		if (!ExpectionalLoadOffsetsFromLocalFiles()) {
+			printf("> offsets: exe yanindaki offsets klasorune offsets.hpp + client_dll.hpp koy.\n");
+			ApplyFallbackOffsets();
+		}
 
 		if (!g_GameMem.initdriver(processid)) {
 			FatalErrorExit(g_GameMem.last_init_error());
@@ -206,9 +209,6 @@ static int ExpectionalMainEntry()
 			exit_code = 1;
 			break;
 		}
-
-		if (!ExpectionalLoadOffsetsFromLocalFiles())
-			printf("> offsets: exe yanindaki offsets klasorune offsets.hpp + client_dll.hpp koy.\n");
 
 		ex_world_bvh::EnsureWorldBvhLoadThread();
 

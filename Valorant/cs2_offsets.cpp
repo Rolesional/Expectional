@@ -547,7 +547,6 @@ void ApplyFallbackOffsets() {
     inferno_m_bFireIsBurning = 0x1620;
     inferno_m_fireCount = 0x1960;
     inferno_m_nFireEffectTickBegin = 0x1974;
-    printf("[offsets] WARNING: Using fallback offsets (2026-07-09 dump, may be outdated).\n");
 }
 
 static bool TryApplyFromDump(const std::string& offsetsContent, const std::string& clientContent, const char* sourceTag) {
@@ -830,4 +829,4 @@ bool ExpectionalLoadOffsetsFromLocalFiles()
 
 	return false;
 }
-
+
