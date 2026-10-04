@@ -1,0 +1,1 @@
+<Project><ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup></Project>

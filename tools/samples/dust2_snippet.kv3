@@ -1,0 +1,54 @@
+{
+	MapName = "de_dust2"
+	WorkshopSubmissionID = "3726623570"
+	MapAnnotationNode0 = 
+	{
+		Enabled = true
+		Type = "grenade"
+		Id = "a0d16a19-5015-4a02-9f47-b8767916bb32"
+		SubType = "main"
+		Position = [ -452.64307, -660.02997, 117.36496 ]
+		Angles = [ 0.0, 88.49933, 0.0 ]
+		Title = 
+		{
+			Text = "Doors Smoke"
+			FontSize = 125
+		}
+		Desc = 
+		{
+			Text = ""
+			FontSize = 75
+		}
+		JumpThrow = false
+		GrenadeType = "smoke"
+	}
+	MapAnnotationNode1 = 
+	{
+		Enabled = true
+		Type = "grenade"
+		Id = "2bb90861-8525-4d8a-b412-595ee013d76a"
+		SubType = "aim_target"
+		Position = [ -450.01025, -561.6857, 192.6323 ]
+		Angles = [ -10.328978, 88.466484, 0.0 ]
+		Title = 
+		{
+			Text = "Doors Smoke"
+			FontSize = 125
+		}
+		Desc = 
+		{
+			Text = "LMB + Jumpthrow"
+			FontSize = 75
+		}
+		MasterNodeId = "a0d16a19-5015-4a02-9f47-b8767916bb32"
+	}
+	MapAnnotationNode2 = 
+	{
+		Enabled = true
+		Type = "grenade"
+		Id = "fbeb6fe1-197a-4368-88a2-983c814e0c54"
+		SubType = "destination"
+		Position = [ -448.03326, 1645.1985, -123.97462 ]
+		MasterNodeId = "a0d16a19-5015-4a02-9f47-b8767916bb32"
+	}
+}

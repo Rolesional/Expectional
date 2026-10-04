@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{101afe41-beeb-4fb0-816c-0c4e5283a567}</ProjectGuid>
+    <RootNamespace>PixelFortnite</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>cs_usermode</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\GameX\Downloads\cs2-external-source-kernel-main %281%29\cs2-external-source-kernel-main\cs2_usermode\Includes\Direct3d;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\GameX\Downloads\roleswarekernel %281%29xdsr\cs2_usermode\Includes;..\Includes\Direct3d;$(IncludePath)</IncludePath>
+    <LibraryPath>..\Includes\Direct3d;$(LibraryPath)</LibraryPath>
+    <TargetName>Expectional</TargetName>
+    <!-- VxLang: false = markers stripped at compile (no VM/obf SDK calls); Obscurion cannot virtualize marked ranges.
+         PERFORMANCE BUILD: KAPALI tutulur. true yapilirsa /Ob0 + /GL- + LTCG kapanir + vxlib runtime calisir => FPS dusurur. -->
+    <EnableVxLang>false</EnableVxLang>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' And '$(EnableVxLang)'=='true'">
+    <!-- VxLang SDK: WPO/LTCG merges marker sites; protector verifier then reports orphan VxObfuscationBegin. -->
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\ThirdParty\VxLang\include;$(ProjectDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\ThirdParty\VxLang\include;$(ProjectDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\ThirdParty\VxLang\include;$(ProjectDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ntdll.lib;wininet.lib;winhttp.lib;shell32.lib;d3d9.lib;d3d11.lib;dxgi.lib;bcrypt.lib;wbemuuid.lib;ole32.lib;oleaut32.lib;iphlpapi.lib;psapi.lib;shlwapi.lib;winmm.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;EXPECTIONAL_USE_R69;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\ThirdParty\VxLang\include;$(ProjectDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapExports>true</MapExports>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <AdditionalLibraryDirectories>C:\Users\MellowNight\Desktop\VALORANTGR\UE4 Usermode\Includes\ProxineAuth\curl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ntdll.lib;wininet.lib;winhttp.lib;shell32.lib;d3d9.lib;d3d11.lib;dxgi.lib;bcrypt.lib;wbemuuid.lib;ole32.lib;oleaut32.lib;iphlpapi.lib;psapi.lib;shlwapi.lib;winmm.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64' And '$(EnableVxLang)'=='true'">
+    <ClCompile>
+      <PreprocessorDefinitions>USE_VL_MACRO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <AdditionalOptions>/GL- /Ob0 /FS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\ThirdParty\VxLang\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vxlib64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <AdditionalOptions>/OPT:NOICF /LTCG:OFF %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)..\ThirdParty\VxLang\lib\vxlib64.dll" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
+      <Message>VxLang: copy vxlib64.dll next to $(TargetFileName)</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Includes\Imgui\imgui.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_impl_dx9.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\Includes\Imgui\imgui_widgets.cpp" />
+    <ClCompile Include="AnanbabanOverlay\expectional_ananbaban_overlay.cpp" />
+    <ClCompile Include="AnanbabanOverlay\expectional_overlay_window.cpp" />
+    <ClCompile Include="Overlay\menu_config_globals.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Protection\vxlang_hooks.cpp" />
+    <ClCompile Include="Protection\lic_auth_vm.cpp" />
+    <ClCompile Include="Driver\driver.cpp">
+      <PreprocessorDefinitions>EXPECTIONAL_USE_R69;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="Driver\r69_controller.cpp">
+      <PreprocessorDefinitions>EXPECTIONAL_USE_R69;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="Driver\expectional_kdmapper_load.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EXPECTIONAL_USE_R69;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="Driver\expectional_r69_bridge.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EXPECTIONAL_USE_R69;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\kdmapper\intel_driver.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>KDLIBMODE;DISABLE_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\kdmapper\kdmapper.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>KDLIBMODE;DISABLE_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\kdmapper\portable_executable.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>KDLIBMODE;DISABLE_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\kdmapper\service.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>KDLIBMODE;DISABLE_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\kdmapper\utils.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\kdmapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>KDLIBMODE;DISABLE_OUTPUT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="cs2_offsets.cpp" />
+    <ClCompile Include="Game\faceit_rank_query.cpp" />
+    <ClCompile Include="Game\cs2_rank_icons.cpp" />
+    <ClCompile Include="Game\cloud_radar.cpp" />
+    <ClCompile Include="Game\window_radar_map_tex.cpp" />
+    <ClCompile Include="ThirdParty\vpk-parser\VtexParser.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\vpk-parser;$(ProjectDir)ThirdParty\vpk-parser\zstd;$(ProjectDir)Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\vpk-parser\zstd\ZstdImpl.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\vpk-parser\zstd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\map_mesh\MapParser.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\map_mesh;$(ProjectDir)ThirdParty\vpk-parser;$(ProjectDir)ThirdParty\vpk-parser\zstd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\map_mesh\Meshopt\VertexCodec.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\map_mesh\Meshopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\map_mesh\Meshopt\IndexCodec.cpp">
+      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\map_mesh\Meshopt;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="Game\map_tri_export.cpp" />
+    <ClCompile Include="Game\window_radar.cpp" />
+    <ClCompile Include="Game\window_radar_d3d9.cpp" />
+    <ClCompile Include="Game\window_radar_hud.cpp" />
+    <ClCompile Include="Game\spotted_visibility.cpp" />
+    <ClCompile Include="Game\grenade_lineup.cpp" />
+    <ClCompile Include="Game\grenade_lineup_workshop.cpp" />
+    <ClCompile Include="Game\steam_workshop_discovery.cpp" />
+    <ClCompile Include="Game\cat_mem_scan.cpp" />
+    <ClCompile Include="Game\catalyst_world_bvh.cpp" />
+    <ClCompile Include="Game\Features\Aimbot.cpp" />
+    <ClCompile Include="Game\Features\TriggerBot.cpp" />
+    <ClCompile Include="Game\votekick_reveal.cpp" />
+    <ClCompile Include="Game\expectional_reveal_workers.cpp" />
+    <ClCompile Include="Game\rank_reveal_cache.cpp" />
+    <ClCompile Include="Game\Features\RCS.cpp" />
+    <ClCompile Include="Game\config_io.cpp" />
+    <ClCompile Include="Game\weapon_runtime.cpp" />
+    <ClCompile Include="Game\weapon_knife_icons.cpp" />
+    <ClCompile Include="Game\esp_preview.cpp" />
+    <ClCompile Include="OSImGui\os_imgui_menu_fonts.cpp" />
+    <ClCompile Include="OSImGui\os_imgui_menu_widgets.cpp" />
+    <ClCompile Include="OSImGui\imgui_edited.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_crypto.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_hwid.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_antidebug.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_ws.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_tcp.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_report.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_login_ui.cpp" />
+    <ClCompile Include="LicenseGuard\src\lic_wire.cpp" />
+    <ClCompile Include="LicenseGuard\src\LicenseGuard.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Includes\Imgui\imconfig.h" />
+    <ClInclude Include="..\Includes\Imgui\imgui.h" />
+    <ClInclude Include="..\Includes\Imgui\imgui_impl_dx9.h" />
+    <ClInclude Include="..\Includes\Imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="..\Includes\Imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\Includes\Imgui\imgui_internal.h" />
+    <ClInclude Include="..\Includes\Imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\Includes\Imgui\imstb_textedit.h" />
+    <ClInclude Include="..\Includes\Imgui\imstb_truetype.h" />
+    <ClInclude Include="AnanbabanOverlay\expectional_ananbaban_overlay.hpp" />
+    <ClInclude Include="AnanbabanOverlay\expectional_overlay_window.hpp" />
+    <ClInclude Include="Driver\driver.hpp" />
+    <ClInclude Include="Driver\r69_syscall.hpp" />
+    <ClInclude Include="Driver\r69_peb_structs.hpp" />
+    <ClInclude Include="Driver\r69_controller.hpp" />
+    <ClInclude Include="Driver\expectional_kdmapper_load.hpp" />
+    <ClInclude Include="Driver\expectional_r69_bridge.hpp" />
+    <ClInclude Include="offsets_embed_resource.h" />
+    <ClInclude Include="..\drivertesti.hpp" />
+    <ClInclude Include="Game\cheat.hpp" />
+    <ClInclude Include="Game\fonts\weapons_font_data.hpp" />
+    <ClInclude Include="Game\weapon_icon_glyphs.hpp" />
+    <ClInclude Include="Game\catalyst_player_esp.hpp" />
+    <ClInclude Include="Game\hit_feedback.hpp" />
+    <ClInclude Include="Game\globals.hpp" />
+    <ClInclude Include="Game\structs.hpp" />
+    <ClInclude Include="Game\entity_handle.hpp" />
+    <ClInclude Include="Game\weapon_names.hpp" />
+    <ClInclude Include="Game\bomb_timer.hpp" />
+    <ClInclude Include="Game\cloud_radar.hpp" />
+    <ClInclude Include="Game\window_radar_map_tex.hpp" />
+    <ClInclude Include="ThirdParty\vpk-parser\VPK.hpp" />
+    <ClInclude Include="ThirdParty\vpk-parser\VtexParser.hpp" />
+    <ClInclude Include="ThirdParty\map_mesh\MapParser.hpp" />
+    <ClInclude Include="Game\map_tri_export.hpp" />
+    <ClInclude Include="Game\window_radar.hpp" />
+    <ClInclude Include="Game\window_radar_d3d9.hpp" />
+    <ClInclude Include="Game\window_radar_hud.hpp" />
+    <ClInclude Include="Game\spotted_visibility.hpp" />
+    <ClInclude Include="Game\cat_mem_scan.hpp" />
+    <ClInclude Include="Game\catalyst_world_bvh.hpp" />
+    <ClInclude Include="Game\stb_image.h" />
+    <ClInclude Include="Game\config_io.hpp" />
+    <ClInclude Include="Game\weapon_runtime.hpp" />
+    <ClInclude Include="Game\esp_preview.hpp" />
+    <ClInclude Include="Game\Features\RCS.hpp" />
+    <ClInclude Include="Protection\vxlang_per_tu.hpp" />
+    <ClInclude Include="Protection\vxlang_scope.hpp" />
+    <ClInclude Include="OSImGui\imgui_edited.hpp" />
+    <ClInclude Include="OSImGui\esp_preview_stub.hpp" />
+    <ClInclude Include="Overlay\menu.hpp" />
+    <ClInclude Include="Overlay\shade_gui.hpp" />
+    <ClInclude Include="Overlay\shade_menu_config_stub.hpp" />
+    <ClInclude Include="Overlay\render.hpp" />
+    <ClInclude Include="LicenseGuard\include\LicenseGuard.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_xor.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_json.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_crypto.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_hwid.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_antidebug.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_ws.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_tcp.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_report.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_login_ui.hpp" />
+    <ClInclude Include="LicenseGuard\include\lic_wire.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="offsets_embed.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

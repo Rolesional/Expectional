@@ -1,0 +1,5 @@
+#include "offsets_embed_resource.h"
+
+IDR_OFFSETS_EMBED_HPP RCDATA "offsets\\offsets.hpp"
+IDR_CLIENT_DLL_EMBED_HPP RCDATA "offsets\\client_dll.hpp"
+IDR_PLAYER_PREVIEW_GLB RCDATA "assets\\player_preview.glb"
