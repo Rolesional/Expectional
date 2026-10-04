@@ -2,6 +2,8 @@
 
 Expectional is an open source, external, read only, kernel level Counter-Strike 2 gameplay enhancer.
 
+Driver: https://github.com/Rolesional/expectional-driver
+
 That is a lot of descriptive words, so what does each of them mean?
 
 - `Expectional` — the name of this project
