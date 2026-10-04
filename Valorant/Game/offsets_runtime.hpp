@@ -136,5 +136,4 @@ extern std::ptrdiff_t entity_m_nSubclassID;
 extern std::uint32_t entity_controller_stride;
 }
 
-	void ApplyFallbackOffsets();
 	bool ExpectionalLoadOffsetsFromLocalFiles(); 

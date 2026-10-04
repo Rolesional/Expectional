@@ -20,8 +20,6 @@
 #include <string>
 #include <thread>
 
-#include "Protection/vxlang_per_tu.hpp"
-
 namespace {
 
 using clock = std::chrono::steady_clock;

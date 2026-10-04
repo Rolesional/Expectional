@@ -22,7 +22,6 @@
 #include "grenade_lineup.hpp"
 #include "catalyst_world_bvh.hpp"
 #include "ex_autowall.hpp"
-#include "../Protection/vxlang_scope.hpp"
 #include "tri_loader.hpp"
 
 using namespace ColorStructs;
@@ -579,7 +578,6 @@ inline void ExpectionalDrawWorldGrenadeOverlayFrame(const UE4Structs::view_matri
 
 void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 {
-	EX_VL_PROTECT_BEGIN;
 	{
 		bool need_bvh = ExpectionalEspBudget::NeedWorldBvhMesh();
 		if (global_pawn) {
@@ -1308,6 +1306,5 @@ void espLoop(const UE4Structs::view_matrix_t* vm_pre = nullptr)
 		if (combat.triggerbot)
 			TriggerBot::Run(g_GameMem.readv<int>(global_pawn + offsets::m_iTeamNum), combat, snapshot);
 	}
-	EX_VL_PROTECT_END;
 }
-
+

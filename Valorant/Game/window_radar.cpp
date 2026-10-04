@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "../../Includes/Imgui/imgui.h"
-#include "Protection/vxlang_per_tu.hpp"
 
 struct MapRadarDef {
 	const char* map_id;

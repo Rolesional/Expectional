@@ -1,13 +1,10 @@
 #include "Game/offsets_runtime.hpp"
-#include "offsets_embed_resource.h"
 
 #include <Windows.h>
 #include <cstdio>
 #include <cstring>
 #include <string>
 #include <vector>
-
-#include "Protection/vxlang_per_tu.hpp"
 
 namespace {
 
@@ -134,104 +131,6 @@ std::ptrdiff_t nade_m_fThrowTime = 0;
 std::ptrdiff_t vdata_m_flThrowVelocity = 0;
 std::ptrdiff_t entity_m_nSubclassID = 0;
 std::uint32_t entity_controller_stride = 112;
-}
-
-static const uint8_t* ExpectionalGetSelfBase()
-{
-	
-	HMODULE mod = nullptr;
-	if (GetModuleHandleExW(
-			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-			reinterpret_cast<LPCWSTR>(&ExpectionalGetSelfBase),
-			&mod) && mod)
-	{
-		return reinterpret_cast<const uint8_t*>(mod);
-	}
-
-	MEMORY_BASIC_INFORMATION mbi{};
-	if (VirtualQuery(reinterpret_cast<const void*>(&ExpectionalGetSelfBase), &mbi, sizeof(mbi)) == sizeof(mbi)
-	    && mbi.AllocationBase)
-	{
-		return reinterpret_cast<const uint8_t*>(mbi.AllocationBase);
-	}
-	return nullptr;
-}
-
-static bool ExpectionalFindRcDataInPE(const uint8_t* base, int resourceId, const uint8_t*& outData, uint32_t& outSize)
-{
-	outData = nullptr;
-	outSize = 0;
-	if (!base) return false;
-	const auto* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(base);
-	if (dos->e_magic != IMAGE_DOS_SIGNATURE) return false;
-	const auto* nt = reinterpret_cast<const IMAGE_NT_HEADERS*>(base + dos->e_lfanew);
-	if (nt->Signature != IMAGE_NT_SIGNATURE) return false;
-	const IMAGE_DATA_DIRECTORY& dd = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE];
-	if (!dd.VirtualAddress || !dd.Size) return false;
-
-	const uint8_t* resBase = base + dd.VirtualAddress;
-	const auto* root = reinterpret_cast<const IMAGE_RESOURCE_DIRECTORY*>(resBase);
-
-	auto entriesOf = [](const IMAGE_RESOURCE_DIRECTORY* d) {
-		return reinterpret_cast<const IMAGE_RESOURCE_DIRECTORY_ENTRY*>(d + 1);
-	};
-
-	const auto* L1 = entriesOf(root);
-	const int n1 = root->NumberOfNamedEntries + root->NumberOfIdEntries;
-	for (int i = 0; i < n1; ++i) {
-		
-		if (L1[i].NameIsString) continue;
-		if (L1[i].Id != static_cast<DWORD>(reinterpret_cast<uintptr_t>(RT_RCDATA))) continue;
-		if (!L1[i].DataIsDirectory) continue;
-		const auto* d2 = reinterpret_cast<const IMAGE_RESOURCE_DIRECTORY*>(resBase + L1[i].OffsetToDirectory);
-		const auto* L2 = entriesOf(d2);
-		const int n2 = d2->NumberOfNamedEntries + d2->NumberOfIdEntries;
-		for (int j = 0; j < n2; ++j) {
-			if (L2[j].NameIsString) continue;
-			if (L2[j].Id != static_cast<DWORD>(resourceId)) continue;
-			if (!L2[j].DataIsDirectory) continue;
-			const auto* d3 = reinterpret_cast<const IMAGE_RESOURCE_DIRECTORY*>(resBase + L2[j].OffsetToDirectory);
-			const auto* L3 = entriesOf(d3);
-			const int n3 = d3->NumberOfNamedEntries + d3->NumberOfIdEntries;
-			if (n3 <= 0) return false;
-			
-			if (L3[0].DataIsDirectory) return false;
-			const auto* de = reinterpret_cast<const IMAGE_RESOURCE_DATA_ENTRY*>(resBase + L3[0].OffsetToData);
-			outData = base + de->OffsetToData;
-			outSize = de->Size;
-			return outSize != 0;
-		}
-	}
-	return false;
-}
-
-static bool LoadRcDataToString(int resourceId, std::string& out)
-{
-	out.clear();
-	const uint8_t* base = ExpectionalGetSelfBase();
-	const uint8_t* data = nullptr;
-	uint32_t sz = 0;
-	if (ExpectionalFindRcDataInPE(base, resourceId, data, sz) && data && sz) {
-		out.assign(reinterpret_cast<const char*>(data), reinterpret_cast<const char*>(data) + sz);
-		return !out.empty();
-	}
-
-	HMODULE mod = nullptr;
-	GetModuleHandleExW(
-		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-		reinterpret_cast<LPCWSTR>(&LoadRcDataToString),
-		&mod);
-	if (!mod) return false;
-	HRSRC res = FindResourceW(mod, MAKEINTRESOURCEW(resourceId), RT_RCDATA);
-	if (!res) return false;
-	const DWORD rsz = SizeofResource(mod, res);
-	if (!rsz) return false;
-	HGLOBAL hg = LoadResource(mod, res);
-	if (!hg) return false;
-	const void* p = LockResource(hg);
-	if (!p) return false;
-	out.assign(static_cast<const char*>(p), static_cast<const char*>(p) + rsz);
-	return !out.empty();
 }
 
 static void TrimInPlace(std::string& s) {
@@ -463,90 +362,6 @@ static bool TryApplyVoteControllerOffsetsFromClassBlock(const std::string& clien
     if (yn > 0 && yn < 0x4000)
         vote_m_bIsYesNoVote = yn;
     return true;
-}
-
-void ApplyFallbackOffsets() {
-    using namespace offsets;
-    dwEntityList = 0x254EE60;
-    dwGameEntitySystem_highestEntityIndex = 0x2090;
-    dwViewMatrix = 0x23A9340;
-    dwViewAngles = 0x23B9C78;
-    dwLocalPlayerPawn = 0x23A4238;
-    dwLocalPlayerController = 0x237EBA0;
-    m_vecOrigin = 0x13B8;
-    m_iTeamNum = 0x3E7;
-    dwPlayerPawn = 0x914;
-    m_hObserverPawn = 0x918;
-    m_iHealth = 0x34C;
-    m_bPawnIsAlive = 0x91C;
-    m_pGameSceneNode = 0x330;
-    m_vecAbsOrigin = 0xC8;
-    {
-        const std::ptrdiff_t m_modelState = 0x140;
-        m_boneArrayFromScene = m_modelState + 0x80;
-    }
-    m_angEyeAngles = 0x3340;
-    m_iIDEntIndex = 0x341C;
-    m_bWaitForNoAttack = 0x1C90;
-    m_bIsScoped = 0x1C70;
-    m_flFlashDuration = 0x1428;
-    m_flEmitSoundTime = 0x1C78;
-    m_vecAbsVelocity = 0x3F8;
-    m_entitySpottedState = 0x1C58;
-    m_ArmorValue = 0x1C9C;
-    entity_controller_stride = 112;
-    m_pObserverServices = 0x1220;
-    m_hObserverTarget = 0x4C;
-    m_hController = 0x13D0;
-    dwGlobalVars = 0x208FD60;
-    dwPlantedC4 = 0x236E678;
-    dwNetworkGameClient = 0x90D4B0;
-    dwBuildNumber = 0x60F594;
-    dwWindowWidth = 0x9118D0;
-    dwWindowHeight = 0x9118D4;
-    m_pWeaponServices = 0x1208;
-    m_hMyWeapons = 0x48;
-    m_hActiveWeapon = 0x60;
-    m_WeaponEcon_AttributeManager = 0x11A8;
-    m_Econ_AttributeManager = m_WeaponEcon_AttributeManager;
-    m_AttributeContainer_Item = 0x50;
-    m_EconItemView_ItemDefinitionIndex = 0x1BA;
-    m_iClip1 = 0x1700;
-    vote_m_iActiveIssueIndex = 0x610;
-    vote_m_iOnlyTeamToVote = 0x614;
-    vote_m_nVoteOptionCount = 0x618;
-    vote_m_nPotentialVotes = 0x62C;
-    vote_m_bVotesDirty = 0x630;
-    vote_m_bTypeDirty = 0x631;
-    vote_m_bIsYesNoVote = 0x632;
-    controller_m_bCannotBeKicked = 0x8E8;
-    m_pBulletServices = 0x1490;
-    m_totalHitsOnServer = 0x48;
-    m_iPing = 0x830;
-    c4_m_flC4Blow = 0x11D0;
-    c4_m_nBombSite = 0x11A4;
-    c4_m_bBeingDefused = 0x11DC;
-    c4_m_flDefuseCountDown = 0x11F0;
-    c4_m_bBombDefused = 0x11F4;
-    m_fFlags = 0x3F4;
-    m_hOwnerEntity = 0x520;
-    m_steamID = 0x780;
-    m_iCompetitiveRanking = 0x888;
-    m_iCompetitiveWins = 0x88C;
-    m_iCompetitiveRankType = 0x890;
-    m_iCompetitiveRankingPredicted_Win = 0x894;
-    m_iCompetitiveRankingPredicted_Loss = 0x898;
-    m_iCompetitiveRankingPredicted_Tie = 0x89C;
-    m_iShotsFired = 0x1C84;
-    m_pAimPunchServices = 0x14B8;
-    m_aimPunchUnpredictableRel = 0xA4;
-    m_aimPunchPredictableRel = 0x50;
-    m_aimPunchAngle = 0x16CC;
-    
-    inferno_m_firePositions = 0x1020;
-    inferno_m_bFireIsBurning = 0x1620;
-    inferno_m_fireCount = 0x1960;
-    inferno_m_nFireEffectTickBegin = 0x1974;
 }
 
 static bool TryApplyFromDump(const std::string& offsetsContent, const std::string& clientContent, const char* sourceTag) {

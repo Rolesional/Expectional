@@ -23,7 +23,6 @@ extern std::mutex g_PlayerListMutex;
 #include <string>
 #include <thread>
 #include <vector>
-#include "Protection/vxlang_per_tu.hpp"
 
 namespace {
 

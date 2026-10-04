@@ -189,8 +189,8 @@ static int ExpectionalMainEntry()
 		}
 
 		if (!ExpectionalLoadOffsetsFromLocalFiles()) {
-			printf("Offsets not found pls put dumped offsets at offsets folder.\n");
-			ApplyFallbackOffsets();
+			FatalErrorExit("Offsets not found pls put dumped offsets at offsets folder.");
+			return 0;
 		}
 
 		if (!g_GameMem.initdriver(processid)) {

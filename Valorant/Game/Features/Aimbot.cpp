@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 #include <random>
-#include "Protection/vxlang_per_tu.hpp"
 
 namespace {
 float g_aimAccumX = 0.f, g_aimAccumY = 0.f;

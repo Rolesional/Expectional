@@ -10,7 +10,6 @@
 #include <cmath>
 #include <cstdint>
 #include <string>
-#include "Protection/vxlang_per_tu.hpp"
 
 namespace {
 

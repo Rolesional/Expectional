@@ -1,6 +1,4 @@
 #pragma once
-// Surucu goruntusu: XOR + parca parca stream (disk/mtlsiz, yalnizca .h).
-// Yeniden uretmek: python tools/gen_driver_h.py ..\..\drayvir\r69-driver\build\r69-driver.sys
 
 #include <cstddef>
 #include <cstdint>
@@ -738,4 +736,4 @@ inline constexpr Part kParts[] = {
 
 inline constexpr size_t kPartCount = 8;
 
-}  // namespace expectional_km_driver_stream
+}  

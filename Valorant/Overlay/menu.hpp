@@ -23,8 +23,6 @@
 #include "../OSImGui/os_imgui_menu.hpp"
 #include "../OSImGui/imgui_edited.hpp"
 #include "../Game/Features/TriggerBot.h"
-#include <vxlib.h>
-#include "../Protection/vxlang_scope.hpp"
 
 inline constexpr float kExpectionalMenuContentX = (1000.f - (470.f * 2.f + 20.f)) * 0.5f;
 

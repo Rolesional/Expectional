@@ -15,7 +15,6 @@
 #include <ostream>
 #include <string>
 #include <unordered_map>
-#include "Protection/vxlang_per_tu.hpp"
 
 namespace {
 
